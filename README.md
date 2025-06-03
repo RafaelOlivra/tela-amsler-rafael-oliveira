@@ -50,7 +50,8 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 
 ## 💡 Motivação
 
-Essa ferramenta foi pensada para auxiliar profissionais da saúde na triagem funcional de pacientes com distúrbios visuais, oferecendo estímulos precisos em tela cheia sem distrações.
+Tive em AVC em Julho de 2024 e venho sofrendo com percas visuais.  
+Essa ferramenta foi pensada para auxiliar no controle da perca visual e também para ajudar profissionais da saúde na triagem funcional de pacientes com distúrbios visuais, oferecendo estímulos precisos em tela cheia sem distrações.
 
 ## 🧑‍💻 Autor
 
