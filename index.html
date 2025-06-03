@@ -154,7 +154,6 @@
             dataLayer.push(arguments);
         }
         gtag("js", new Date());
-
         gtag("config", "G-75M78F17BD");
     </script>
 
@@ -181,6 +180,13 @@
             >
                 Inverter
             </button>
+            <button
+                class="toggle-button"
+                onclick="toggleRainMode()"
+                title="Ativar/Desativar Modo Chuva (Ctrl + R)"
+            >
+                Modo Chuva
+            </button>
         </div>
 
         <div class="grid-wrapper" id="wrapper">
@@ -192,11 +198,12 @@
             let eraseMode = false;
             let zoomLevel = 1;
             let hideTimeout;
+            let rainMode = false;
+            let rainInterval;
 
             function drawGrid() {
                 const grid = document.getElementById("grid");
 
-                // Step 1: Save current colored cells
                 const oldCells = Array.from(grid.children);
                 const oldState = oldCells.map((cell) =>
                     cell.classList.contains("colored")
@@ -215,23 +222,21 @@
                     const cell = document.createElement("div");
                     cell.className = "grid-cell";
 
-                    // Restore state if it existed before
                     if (oldState[i]) {
                         cell.classList.add("colored");
                     }
 
-                    // Mouse
                     cell.addEventListener("mousedown", (e) => {
                         e.preventDefault();
                         isMouseDown = true;
                         eraseMode = e.button === 2;
                         paintCell(cell);
                     });
+
                     cell.addEventListener("mouseover", () => {
                         if (isMouseDown) paintCell(cell);
                     });
 
-                    // Touch
                     cell.addEventListener("touchstart", (e) => {
                         e.preventDefault();
                         paintCell(cell);
@@ -240,7 +245,6 @@
                     grid.appendChild(cell);
                 }
 
-                // Recalculate center dot
                 const centerCol = Math.floor(columns / 2);
                 const centerRow = Math.floor(rows / 2);
                 const centerIndex = centerRow * columns + centerCol;
@@ -274,6 +278,53 @@
                 }, 3000);
             }
 
+            function toggleRainMode() {
+                rainMode = !rainMode;
+                if (rainMode) {
+                    startRain();
+                } else {
+                    clearInterval(rainInterval);
+                }
+            }
+
+            function startRain() {
+                const grid = document.getElementById("grid");
+                const cells = grid.children;
+                const columns = parseInt(
+                    getComputedStyle(grid).gridTemplateColumns.split(" ").length
+                );
+                const rows = parseInt(
+                    getComputedStyle(grid).gridTemplateRows.split(" ").length
+                );
+                const tailLength = 4;
+
+                rainInterval = setInterval(() => {
+                    const col = Math.floor(Math.random() * columns);
+                    let currentRow = 0;
+
+                    const drop = setInterval(() => {
+                        // Apaga a célula que ficou para trás da cauda
+                        const clearIndex =
+                            (currentRow - tailLength) * columns + col;
+                        if (currentRow >= tailLength && cells[clearIndex]) {
+                            cells[clearIndex].classList.remove("colored");
+                        }
+
+                        // Adiciona a nova célula à cauda
+                        const index = currentRow * columns + col;
+                        if (cells[index]) {
+                            cells[index].classList.add("colored");
+                        }
+
+                        currentRow++;
+
+                        if (currentRow >= rows + tailLength) {
+                            clearInterval(drop);
+                        }
+                    }, 50);
+                }, 300);
+            }
+
             window.addEventListener("mouseup", () => {
                 isMouseDown = false;
             });
@@ -286,14 +337,21 @@
             window.addEventListener("keydown", (e) => {
                 showControls();
                 if (e.ctrlKey) {
-                    const key = e.key;
-                    if (key.toLowerCase() === "i") {
+                    if (e.key.toLowerCase() === "i") {
                         e.preventDefault();
                         toggleTheme();
-                    } else if (key === "+" || key === "=" || key === "Add") {
+                    }
+                    if (e.key.toLowerCase() === "r") {
+                        e.preventDefault();
+                        toggleRainMode();
+                    } else if (
+                        e.key === "+" ||
+                        e.key === "=" ||
+                        e.key === "Add"
+                    ) {
                         e.preventDefault();
                         adjustZoom(0.1);
-                    } else if (key === "-" || key === "Subtract") {
+                    } else if (e.key === "-" || e.key === "Subtract") {
                         e.preventDefault();
                         adjustZoom(-0.1);
                     }
