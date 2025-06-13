@@ -107,6 +107,16 @@
                 background-color: rgba(0, 0, 0, 0.9);
             }
 
+            .toggle-button.active {
+                background-color: rgba(0, 0, 0, 1);
+            }
+
+            .toggle-button span {
+                display: block;
+                font-size: 60%;
+                padding-top: 3px;
+            }
+
             body.dark .toggle-button,
             body.dark .zoom-button {
                 background-color: rgba(255, 255, 255, 0.2);
@@ -116,6 +126,11 @@
             body.dark .toggle-button:hover,
             body.dark .zoom-button:hover {
                 background-color: rgba(255, 255, 255, 0.4);
+            }
+
+            body.dark .toggle-button.active {
+                background-color: rgba(255, 255, 255, 1);
+                color: black;
             }
 
             @media print {
@@ -178,14 +193,18 @@
                 onclick="toggleTheme()"
                 title="Inverter cores (Ctrl + I)"
             >
-                Inverter
+                🔄<span>Inverter Cores</span>
             </button>
             <button
+                id="rain-toggle"
                 class="toggle-button"
                 onclick="toggleRainMode()"
                 title="Ativar/Desativar Modo Chuva (Ctrl + R)"
             >
-                Modo Chuva
+                🌧️<span>Modo Chuva</span>
+            </button>
+            <button class="toggle-button" onclick="copyShareLink()" title="Compartilhar grade">
+                🔗<span>Compartilhar</span>
             </button>
         </div>
 
@@ -201,6 +220,7 @@
             let rainMode = false;
             let rainInterval;
 
+            /* Grid Drawing */
             function drawGrid() {
                 const grid = document.getElementById("grid");
 
@@ -253,6 +273,46 @@
                 }
             }
 
+            function drawGridFixed(columns, rows) {
+                const grid = document.getElementById("grid");
+                grid.innerHTML = "";
+
+                const cellSize = 20;
+                grid.style.gridTemplateColumns = `repeat(${columns}, ${cellSize}px)`;
+                grid.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+
+                for (let i = 0; i < columns * rows; i++) {
+                    const cell = document.createElement("div");
+                    cell.className = "grid-cell";
+
+                    cell.addEventListener("mousedown", (e) => {
+                        e.preventDefault();
+                        isMouseDown = true;
+                        eraseMode = e.button === 2;
+                        paintCell(cell);
+                    });
+
+                    cell.addEventListener("mouseover", () => {
+                        if (isMouseDown) paintCell(cell);
+                    });
+
+                    cell.addEventListener("touchstart", (e) => {
+                        e.preventDefault();
+                        paintCell(cell);
+                    });
+
+                    grid.appendChild(cell);
+                }
+
+                // marca o ponto central
+                const centerCol = Math.floor(columns / 2);
+                const centerRow = Math.floor(rows / 2);
+                const centerIndex = centerRow * columns + centerCol;
+                if (grid.children[centerIndex]) {
+                    grid.children[centerIndex].classList.add("center-dot");
+                }
+            }
+
             function paintCell(cell) {
                 if (eraseMode) {
                     cell.classList.remove("colored");
@@ -261,32 +321,91 @@
                 }
             }
 
-            function toggleTheme() {
-                document.body.classList.toggle("dark");
+            /* Grid Reconstruction from URL */
+            function getGridDataString(columns, rows) {
+                const grid = document.getElementById("grid");
+                const cells = grid.children;
+                let output = `W[${columns}x${rows}]`;
+
+                for (let row = 0; row < rows; row++) {
+                    let rowStr = `R${row + 1}`;
+                    let currentStart = null;
+
+                    for (let col = 0; col <= columns; col++) {
+                        const index = row * columns + col;
+                        const cell = cells[index];
+                        const isColored = cell?.classList.contains("colored");
+
+                        if (isColored && currentStart === null) {
+                            currentStart = col + 1;
+                        } else if (!isColored && currentStart !== null) {
+                            rowStr += `[${currentStart}-${col}]`;
+                            currentStart = null;
+                        }
+                    }
+
+                    if (rowStr !== `R${row + 1}`) {
+                        output += rowStr;
+                    }
+                }
+
+                return btoa(output); // encode to base64
             }
 
-            function adjustZoom(delta) {
-                zoomLevel = Math.max(0.5, Math.min(3, zoomLevel + delta));
-                wrapper.style.transform = `scale(${zoomLevel})`;
-            }
+            function loadGridDataFromString(encodedData) {
+                const decoded = atob(encodedData);
+                const grid = document.getElementById("grid");
 
-            function showControls() {
-                controls.classList.remove("hidden");
-                clearTimeout(hideTimeout);
-                hideTimeout = setTimeout(() => {
-                    controls.classList.add("hidden");
-                }, 3000);
-            }
+                const sizeMatch = decoded.match(/^W\[(\d+)x(\d+)\]/);
+                if (!sizeMatch) return;
+                const columns = parseInt(sizeMatch[1]);
+                const rows = parseInt(sizeMatch[2]);
 
-            function toggleRainMode() {
-                rainMode = !rainMode;
-                if (rainMode) {
-                    startRain();
-                } else {
-                    clearInterval(rainInterval);
+                drawGridFixed(columns, rows); // cria a grade com tamanho fixo
+
+                const cells = grid.children;
+                const data = decoded.slice(sizeMatch[0].length);
+                const rowRegex = /R(\d+)((\[\d+-\d+\])+)/g;
+                const rangeRegex = /\[(\d+)-(\d+)\]/g;
+                let match;
+
+                while ((match = rowRegex.exec(data)) !== null) {
+                    const row = parseInt(match[1]) - 1;
+                    const rangesStr = match[2];
+                    let rangeMatch;
+                    while ((rangeMatch = rangeRegex.exec(rangesStr)) !== null) {
+                        const start = parseInt(rangeMatch[1]) - 1;
+                        const end = parseInt(rangeMatch[2]) - 1;
+                        for (let col = start; col <= end; col++) {
+                            const index = row * columns + col;
+                            if (cells[index])
+                                cells[index].classList.add("colored");
+                        }
+                    }
                 }
             }
 
+            function copyShareLink() {
+                if (rainMode) {
+                    alert("Desative o Modo Chuva para compartilhar.");
+                    return;
+                }
+
+                const grid = document.getElementById("grid");
+                const columns = parseInt(
+                    getComputedStyle(grid).gridTemplateColumns.split(" ").length
+                );
+                const rows = parseInt(
+                    getComputedStyle(grid).gridTemplateRows.split(" ").length
+                );
+                const dataStr = getGridDataString(columns, rows);
+                const url = new URL(window.location.href);
+                url.searchParams.set("data", dataStr);
+                navigator.clipboard.writeText(url.toString());
+                alert("Link copiado!");
+            }
+
+            /* Rain Mode */
             function startRain() {
                 const grid = document.getElementById("grid");
                 const cells = grid.children;
@@ -325,6 +444,37 @@
                 }, 300);
             }
 
+            /* Controls */
+            function toggleTheme() {
+                document.body.classList.toggle("dark");
+            }
+
+            function adjustZoom(delta) {
+                zoomLevel = Math.max(0.5, Math.min(3, zoomLevel + delta));
+                wrapper.style.transform = `scale(${zoomLevel})`;
+            }
+
+            function showControls() {
+                controls.classList.remove("hidden");
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(() => {
+                    controls.classList.add("hidden");
+                }, 3000);
+            }
+
+            function toggleRainMode() {
+                const btn = document.getElementById("rain-toggle");
+                rainMode = !rainMode;
+                if (rainMode) {
+                    startRain();
+                    btn.classList.add("active");
+                } else {
+                    clearInterval(rainInterval);
+                    btn.classList.remove("active");
+                }
+            }
+
+            /* Event Listeners */
             window.addEventListener("mouseup", () => {
                 isMouseDown = false;
             });
@@ -365,10 +515,19 @@
                 }
             });
 
-            window.addEventListener("resize", drawGrid);
+            window.addEventListener("load", () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const data = urlParams.get("data");
 
-            drawGrid();
-            showControls(); // Show on load
+                if (data) {
+                    loadGridDataFromString(data);
+                } else {
+                    drawGrid(); // padrão (responsivo)
+                    window.addEventListener("resize", drawGrid);
+                }
+
+                showControls();
+            });
         </script>
     </body>
 </html>
