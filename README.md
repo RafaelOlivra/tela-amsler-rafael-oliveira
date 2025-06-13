@@ -8,7 +8,7 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 - ✅ **Modo claro/escuro** com um clique (ou atalho `Ctrl + I`)  
 - ✅ **Zoom in/out** com botões ou atalhos (`Ctrl + + / -`)  
 - ✅ **Botão para apagar** toda a marcação (tecla `Espaço`)  
-- ✅ **Modo Chuva (Rain Mode)**: Linhas verticais com 4 blocos de altura descem aleatoriamente, simulando estímulos visuais para diagnóstico funcional de áreas de perda de percepção  
+- ✅ **Modo Chuva (Rain Mode)**: Linhas verticais com 4 blocos de altura descem aleatoriamente, simulando estímulos visuais para diagnóstico funcional de áreas de perda de percepção (`Ctrl + R`)
 - ✅ **Compartilhamento**: Gera uma URL com os quadrados preenchidos codificados para compartilhamento
 
 ## 🌐 Acesso
