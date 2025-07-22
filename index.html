@@ -87,13 +87,15 @@
 
             #controls {
                 position: fixed;
-                top: 10px;
-                right: 10px;
+                top: 0;
+                right: 0;
                 z-index: 1000;
                 display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
                 gap: 5px;
                 transition: opacity 0.4s ease;
-                zoom: 0.95;
+                padding: 10px;
             }
 
             #controls.hidden {
@@ -111,6 +113,7 @@
                 font-size: 14px;
                 cursor: pointer;
                 transition: background-color 0.3s;
+                zoom: 0.95;
             }
 
             .toggle-button:hover,
@@ -208,7 +211,7 @@
             <button
                 class="toggle-button"
                 onclick="toggleGridOrientation()"
-                title="Alternar Orientação da Grade (Ctrl + G)"
+                title="Alternar Orientação da Grade (Ctrl + O)"
             >
                 🔄<span>Alternar Orientação</span>
             </button>
@@ -223,7 +226,7 @@
             <button
                 class="toggle-button"
                 onclick="copyShareLink()"
-                title="Compartilhar grade"
+                title="Compartilhar grade (Ctrl + S)"
             >
                 🔗<span>Compartilhar</span>
             </button>
@@ -551,14 +554,28 @@
             window.addEventListener("keydown", (e) => {
                 showControls();
                 if (e.ctrlKey) {
+                    // Invert colors
                     if (e.key.toLowerCase() === "i") {
                         e.preventDefault();
                         toggleTheme();
                     }
-                    if (e.key.toLowerCase() === "r") {
+                    // Toggle grid orientation
+                    else if (e.key.toLowerCase() === "o") {
+                        e.preventDefault();
+                        toggleGridOrientation();
+                    }
+                    // Copy share link
+                    else if (e.key.toLowerCase() === "s") {
+                        e.preventDefault();
+                        copyShareLink();
+                    }
+                    // Toggle rain mode
+                    else if (e.key.toLowerCase() === "r") {
                         e.preventDefault();
                         toggleRainMode();
-                    } else if (
+                    }
+                    // Zoom in or out
+                    else if (
                         e.key === "+" ||
                         e.key === "=" ||
                         e.key === "Add"
