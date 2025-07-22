@@ -58,6 +58,16 @@
                 height: 100%;
             }
 
+            body.grid-y .grid-cell {
+                border-top: 0;
+                border-bottom: 0;
+            }
+
+            body.grid-x .grid-cell {
+                border-left: 0;
+                border-right: 0;
+            }
+
             .grid-cell.colored {
                 background-color: var(--cell-color);
             }
@@ -83,6 +93,7 @@
                 display: flex;
                 gap: 5px;
                 transition: opacity 0.4s ease;
+                zoom: 0.95;
             }
 
             #controls.hidden {
@@ -92,7 +103,7 @@
 
             .toggle-button,
             .zoom-button {
-                padding: 10px 14px;
+                padding: 5px 12px;
                 background-color: rgba(0, 0, 0, 0.7);
                 color: white;
                 border: none;
@@ -158,7 +169,6 @@
         </style>
     </head>
 
-    <!-- Google tag (gtag.js) -->
     <script
         async
         src="https://www.googletagmanager.com/gtag/js?id=G-75M78F17BD"
@@ -196,6 +206,13 @@
                 🔄<span>Inverter Cores</span>
             </button>
             <button
+                class="toggle-button"
+                onclick="toggleGridOrientation()"
+                title="Alternar Orientação da Grade (Ctrl + G)"
+            >
+                🔄<span>Alternar Orientação</span>
+            </button>
+            <button
                 id="rain-toggle"
                 class="toggle-button"
                 onclick="toggleRainMode()"
@@ -203,7 +220,11 @@
             >
                 🌧️<span>Modo Chuva</span>
             </button>
-            <button class="toggle-button" onclick="copyShareLink()" title="Compartilhar grade">
+            <button
+                class="toggle-button"
+                onclick="copyShareLink()"
+                title="Compartilhar grade"
+            >
                 🔗<span>Compartilhar</span>
             </button>
         </div>
@@ -224,6 +245,7 @@
             function drawGrid() {
                 const grid = document.getElementById("grid");
 
+                // Save current colored cell state to reapply after resize
                 const oldCells = Array.from(grid.children);
                 const oldState = oldCells.map((cell) =>
                     cell.classList.contains("colored")
@@ -242,6 +264,7 @@
                     const cell = document.createElement("div");
                     cell.className = "grid-cell";
 
+                    // Reapply old state if it exists for the current cell
                     if (oldState[i]) {
                         cell.classList.add("colored");
                     }
@@ -249,7 +272,7 @@
                     cell.addEventListener("mousedown", (e) => {
                         e.preventDefault();
                         isMouseDown = true;
-                        eraseMode = e.button === 2;
+                        eraseMode = e.button === 2; // Right-click for erase
                         paintCell(cell);
                     });
 
@@ -265,6 +288,7 @@
                     grid.appendChild(cell);
                 }
 
+                // Mark the center dot
                 const centerCol = Math.floor(columns / 2);
                 const centerRow = Math.floor(rows / 2);
                 const centerIndex = centerRow * columns + centerCol;
@@ -304,7 +328,7 @@
                     grid.appendChild(cell);
                 }
 
-                // marca o ponto central
+                // Mark the center dot
                 const centerCol = Math.floor(columns / 2);
                 const centerRow = Math.floor(rows / 2);
                 const centerIndex = centerRow * columns + centerCol;
@@ -348,6 +372,14 @@
                         output += rowStr;
                     }
                 }
+                // Add theme and orientation to the encoded string
+                const isDark = document.body.classList.contains("dark");
+                const isGridX = document.body.classList.contains("grid-x");
+                const isGridY = document.body.classList.contains("grid-y");
+
+                if (isDark) output += "T[D]"; // Dark theme
+                if (isGridX) output += "O[X]"; // Grid X orientation
+                if (isGridY) output += "O[Y]"; // Grid Y orientation
 
                 return btoa(output); // encode to base64
             }
@@ -361,10 +393,30 @@
                 const columns = parseInt(sizeMatch[1]);
                 const rows = parseInt(sizeMatch[2]);
 
-                drawGridFixed(columns, rows); // cria a grade com tamanho fixo
+                drawGridFixed(columns, rows); // create grid with fixed size
 
                 const cells = grid.children;
-                const data = decoded.slice(sizeMatch[0].length);
+                // Extract grid data, excluding size, theme, and orientation info
+                let data = decoded.slice(sizeMatch[0].length);
+
+                // Check for theme and apply
+                const themeMatch = data.match(/T\[(D)\]/);
+                if (themeMatch && themeMatch[1] === "D") {
+                    document.body.classList.add("dark");
+                    data = data.replace(themeMatch[0], ""); // Remove theme info from data
+                }
+
+                // Check for grid orientation and apply
+                const orientationMatch = data.match(/O\[(X|Y)\]/);
+                if (orientationMatch) {
+                    if (orientationMatch[1] === "X") {
+                        document.body.classList.add("grid-x");
+                    } else if (orientationMatch[1] === "Y") {
+                        document.body.classList.add("grid-y");
+                    }
+                    data = data.replace(orientationMatch[0], ""); // Remove orientation info from data
+                }
+
                 const rowRegex = /R(\d+)((\[\d+-\d+\])+)/g;
                 const rangeRegex = /\[(\d+)-(\d+)\]/g;
                 let match;
@@ -385,6 +437,7 @@
                 }
             }
 
+            /* Share Link */
             function copyShareLink() {
                 if (rainMode) {
                     alert("Desative o Modo Chuva para compartilhar.");
@@ -422,14 +475,14 @@
                     let currentRow = 0;
 
                     const drop = setInterval(() => {
-                        // Apaga a célula que ficou para trás da cauda
+                        // Clear the cell that's now behind the tail
                         const clearIndex =
                             (currentRow - tailLength) * columns + col;
                         if (currentRow >= tailLength && cells[clearIndex]) {
                             cells[clearIndex].classList.remove("colored");
                         }
 
-                        // Adiciona a nova célula à cauda
+                        // Add the new cell to the tail
                         const index = currentRow * columns + col;
                         if (cells[index]) {
                             cells[index].classList.add("colored");
@@ -447,6 +500,17 @@
             /* Controls */
             function toggleTheme() {
                 document.body.classList.toggle("dark");
+            }
+
+            function toggleGridOrientation() {
+                if (document.body.classList.contains("grid-x")) {
+                    document.body.classList.remove("grid-x");
+                    document.body.classList.add("grid-y");
+                } else if (document.body.classList.contains("grid-y")) {
+                    document.body.classList.remove("grid-y");
+                } else {
+                    document.body.classList.add("grid-x");
+                }
             }
 
             function adjustZoom(delta) {
@@ -522,7 +586,7 @@
                 if (data) {
                     loadGridDataFromString(data);
                 } else {
-                    drawGrid(); // padrão (responsivo)
+                    drawGrid(); // default (responsive)
                     window.addEventListener("resize", drawGrid);
                 }
 
