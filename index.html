@@ -519,7 +519,7 @@
             }
 
             function adjustZoom(delta) {
-                zoomLevel = Math.max(0.5, Math.min(3, zoomLevel + delta));
+                zoomLevel = Math.max(0.1, Math.min(3, zoomLevel + delta));
                 wrapper.style.transform = `scale(${zoomLevel})`;
             }
 
