@@ -171,7 +171,6 @@ body.dark .toggle-button.active {
     color: black;
 }
 
-/* Blink animation */
 @keyframes blink {
 
     0%,
