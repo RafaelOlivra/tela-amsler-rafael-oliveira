@@ -81,8 +81,21 @@
             }
 
             .center-dot {
+                position: relative;
                 background-color: var(--dot-color) !important;
                 border: none;
+            }
+
+            .center-dot::after {
+                content: "";
+                position: absolute;
+                width: 30%;
+                height: 30%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border-radius: 50%;
+                background: var(--bg-color);
             }
 
             #controls {
@@ -151,8 +164,13 @@
 
             /* Blink animation */
             @keyframes blink {
-                0%, 100% { background-color: var(--cell-color); }
-                50% { background-color: transparent; }
+                0%,
+                100% {
+                    background-color: var(--cell-color);
+                }
+                50% {
+                    background-color: transparent;
+                }
             }
 
             .grid-cell.blink-animation {
@@ -264,7 +282,7 @@
                 const oldCells = Array.from(grid.children);
                 const oldState = oldCells.map((cell) => ({
                     isColored: cell.classList.contains("colored"),
-                    isBlinking: cell.classList.contains("blink-animation") // Save blink state
+                    isBlinking: cell.classList.contains("blink-animation"), // Save blink state
                 }));
 
                 grid.innerHTML = "";
@@ -285,7 +303,8 @@
                         if (oldState[i].isColored) {
                             cell.classList.add("colored");
                         }
-                        if (oldState[i].isBlinking) { // Reapply blink state
+                        if (oldState[i].isBlinking) {
+                            // Reapply blink state
                             cell.classList.add("blink-animation");
                         }
                     }
@@ -384,7 +403,8 @@
                         const index = row * columns + col;
                         const cell = cells[index];
                         const isColored = cell?.classList.contains("colored");
-                        const isBlinking = cell?.classList.contains("blink-animation");
+                        const isBlinking =
+                            cell?.classList.contains("blink-animation");
 
                         if (isColored && currentStart === null) {
                             currentStart = col + 1;
@@ -525,7 +545,9 @@
                             (currentRow - tailLength) * columns + col;
                         if (currentRow >= tailLength && cells[clearIndex]) {
                             cells[clearIndex].classList.remove("colored");
-                            cells[clearIndex].classList.remove("blink-animation"); // Ensure blinking stops
+                            cells[clearIndex].classList.remove(
+                                "blink-animation"
+                            ); // Ensure blinking stops
                         }
 
                         // Add the new cell to the tail
@@ -581,10 +603,12 @@
                 } else {
                     clearInterval(rainInterval);
                     // Clear all colored cells when exiting rain mode
-                    document.querySelectorAll(".grid-cell.colored").forEach(cell => {
-                        cell.classList.remove("colored");
-                        cell.classList.remove("blink-animation");
-                    });
+                    document
+                        .querySelectorAll(".grid-cell.colored")
+                        .forEach((cell) => {
+                            cell.classList.remove("colored");
+                            cell.classList.remove("blink-animation");
+                        });
                     btn.classList.remove("active");
                 }
             }
@@ -637,7 +661,9 @@
                 } else if (e.code === "Space") {
                     e.preventDefault();
                     document
-                        .querySelectorAll(".grid-cell.colored, .grid-cell.blink-animation") // Clear blinking cells too
+                        .querySelectorAll(
+                            ".grid-cell.colored, .grid-cell.blink-animation"
+                        ) // Clear blinking cells too
                         .forEach((cell) => {
                             cell.classList.remove("colored");
                             cell.classList.remove("blink-animation");
