@@ -4,55 +4,60 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 
 ## ✨ Funcionalidades
 
-- ✅ **Grade responsiva** para marcação de distorções visuais  
-- ✅ **Modo claro/escuro** com um clique (ou atalho `Ctrl + I`)  
-- ✅ **Zoom in/out** com botões ou atalhos (`Ctrl + + / -`)  
-- ✅ **Botão para apagar** toda a marcação (tecla `Espaço`)  
-- ✅ **Modo Chuva (Rain Mode)**: Linhas verticais com 4 blocos de altura descem aleatoriamente, simulando estímulos visuais para diagnóstico funcional de áreas de perda de percepção (`Ctrl + R`)
-- ✅ **Compartilhamento**: Gera uma URL com os quadrados preenchidos codificados para compartilhamento
+-   ✅ **Grade responsiva** para marcação de distorções visuais
+-   ✅ **Modo claro/escuro** com um clique (ou atalho `Ctrl + I`)
+-   ✅ **Zoom in/out** com botões ou atalhos (`Ctrl + + / -`)
+-   ✅ **Botão para apagar** toda a marcação (tecla `Espaço`)
+-   ✅ **Modo Chuva (Rain Mode)**: Linhas verticais com 4 blocos de altura descem aleatoriamente, simulando estímulos visuais para diagnóstico funcional de áreas de perda de percepção (`Ctrl + R`)
+-   ✅ **Compartilhamento**: Gera uma URL com os quadrados preenchidos codificados para compartilhamento, **incluindo agora as células piscando e a posição personalizada do ponto central**.
+-   ✅ **Ponto central personalizável**: Mova o ponto central para qualquer quadrado da grade segurando `Shift` e clicando na nova posição.
+-   ✅ **Células piscando**: Marque células individuais para piscar segurando `Ctrl` e clicando nelas.
 
 ## 🌐 Acesso
 
-[Acesse a ferramenta em meu website!](https://rafaeloliveiradesign.com/tela-amsler/)
+[Acesse a ferramenta em meu website\!](https://rafaeloliveiradesign.com/tela-amsler/)
 
 ## 📸 Captura de Tela
-
-![Tela de Amsler com Modo Chuva](./screenshot.png)
 
 > A tela se adapta automaticamente ao tamanho da janela e permite desenhar livremente clicando nas células.
 
 ## 🎮 Atalhos do Teclado
 
-| Ação                    | Tecla                     |
-|-------------------------|---------------------------|
-| Aumentar zoom           | Ctrl + `+`                |
-| Diminuir zoom           | Ctrl + `-`                |
-| Inverter cores          | Ctrl + `I`                |
-| Limpar marcações        | `Espaço`                  |
-| Ativar/Desativar chuva  | Clique em `Rain Mode`     |
+| Ação                       | Tecla                      |
+| :------------------------- | :------------------------- |
+| Aumentar zoom              | `Ctrl` + `+`               |
+| Diminuir zoom              | `Ctrl` + `-`               |
+| Inverter cores             | `Ctrl` + `I`               |
+| Limpar marcações           | `Espaço`                   |
+| Ativar/Desativar chuva     | `Ctrl` + `R` ou botão      |
+| **Mover ponto central**    | `Shift` + clique na célula |
+| **Marcar célula piscando** | `Ctrl` + clique na célula  |
+| **Compartilhar grade**     | `Ctrl` + `S` ou botão      |
 
 ## ⚙️ Clonar e modificar
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seuusuario/tela-amsler-rainmode.git
-   cd tela-amsler-rainmode
-   ```
+1.  Clone o repositório:
 
-2. Abra o arquivo HTML diretamente no navegador:
-   ```
-   index.html
-   ```
+    ```bash
+    git clone https://github.com/seuusuario/tela-amsler-rainmode.git
+    cd tela-amsler-rainmode
+    ```
 
-3. (Opcional) Suba num servidor local com VS Code Live Server ou Python:
-   ```bash
-   python -m http.server
-   ```
+2.  Abra o arquivo HTML diretamente no navegador:
+
+    ```
+    index.html
+    ```
+
+3.  (Opcional) Suba num servidor local com VS Code Live Server ou Python:
+
+    ```bash
+    python -m http.server
+    ```
 
 ## 💡 Motivação
 
-Tive em AVC em Julho de 2024 e venho sofrendo com percas visuais.  
-Essa ferramenta foi pensada para auxiliar no controle da perca visual e também para ajudar profissionais da saúde na triagem funcional de pacientes com distúrbios visuais, oferecendo estímulos precisos em tela cheia sem distrações.
+Tive um AVC em Julho de 2024 e venho sofrendo com perdas visuais. Essa ferramenta foi pensada para auxiliar no controle da perda visual e também para ajudar profissionais da saúde na triagem funcional de pacientes com distúrbios visuais, oferecendo estímulos precisos em tela cheia sem distrações.
 
 ## 🧑‍💻 Autor
 
@@ -60,4 +65,4 @@ Desenvolvido por [Rafael Oliveira](https://rafaeloliveiradesign.com)
 
 ---
 
-© Rafael Oliveira - Licença livre para uso educacional e clínico.  
+© Rafael Oliveira - Licença livre para uso educacional e clínico.
