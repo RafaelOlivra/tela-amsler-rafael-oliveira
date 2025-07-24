@@ -2,6 +2,8 @@
 
 Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico rápido de distorções visuais**, como as causadas por **degeneração macular** ou sequelas de AVC.
 
+![Tela de Amsler com Modo Chuva](./screenshot.png)
+
 ## ✨ Funcionalidades
 
 -   ✅ **Grade responsiva** para marcação de distorções visuais

@@ -130,7 +130,7 @@ body.grid-x .grid-cell {
             #fff 20%);
 }
 
-.toggle-button span {
+button span {
     position: absolute;
     background: color-mix(in srgb,
             var(--button-bg-color),
@@ -149,8 +149,8 @@ body.grid-x .grid-cell {
     display: none;
 }
 
-.toggle-button:hover span,
-.toggle-button:focus span {
+button:hover span,
+button:focus span {
     opacity: 1;
 }
 
