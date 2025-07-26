@@ -12,7 +12,7 @@
             name="description"
             content="Tela de Amsler — Ferramenta de triagem visual em tela cheia para detectar distorções visuais como as causadas pela degeneração macular."
         />
-        <link rel="stylesheet" href="./styles.css" />
+        <link rel="stylesheet" href="./styles.css?cache-bust=1" />
     </head>
 
     <script
@@ -35,43 +35,43 @@
                 onclick="adjustZoom(0.1)"
                 title="Aumentar zoom (Ctrl + +)"
             >
-                +<span>Zoom In</span>
+                +<span>Aumentar zoom</span>
             </button>
             <button
                 class="zoom-button zoom-out"
                 onclick="adjustZoom(-0.1)"
                 title="Diminuir zoom (Ctrl + -)"
             >
-                –<span>Zoom Out</span>
+                –<span>Diminuir zoom</span>
             </button>
             <button
                 class="toggle-button"
                 onclick="toggleTheme()"
                 title="Inverter cores (Ctrl + I)"
             >
-                🌓<span>Invert Colors</span>
+                🌓<span>Inverter cores</span>
             </button>
             <button
                 class="toggle-button"
                 onclick="toggleGridOrientation()"
-                title="Toggle Grid Orientation (Ctrl + O)"
+                title="Mudar orientação da grade (Ctrl + O)"
             >
-                🔄<span>Toggle Grid</span>
+                🔄<span>Mudar Grade</span>
             </button>
             <button
                 id="rain-toggle"
                 class="toggle-button"
                 onclick="toggleRainMode()"
-                title="Enable/Disable Rain Mode (Ctrl + R)"
+                title="Ativar/Desativar Modo Chuva (Ctrl + R)"
             >
-                🌧️<span>Rain Mode</span>
+                🌧️<span>Modo Chuva</span>
             </button>
             <button
                 class="toggle-button"
                 onclick="copyShareLink()"
-                title="Share grid (Ctrl + S)"
+                title="Compartilhar grade (Ctrl + S)"
             >
-                🔗<span>Share</span>
+                🔗<span>Compartilhar</span>
             </button>
         </div>
 
