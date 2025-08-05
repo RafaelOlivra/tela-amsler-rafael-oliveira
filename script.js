@@ -1,0 +1,632 @@
+/**
+ * ==========================================
+ * Scripts - Tela de Amsler Responsiva
+ * ==========================================
+ */
+
+// Define global variables
+let isMouseDown = false;
+let eraseMode = false;
+let zoomLevel = 1;
+let hideTimeout;
+let rainMode = false;
+let rainInterval;
+
+/**
+ * Draws the grid dynamically based on the window size.
+ * It creates a grid of cells that can be colored, blinked, or erased.
+ * The grid adjusts to the window size and maintains a center dot.
+ */
+function drawGrid() {
+    const grid = document.getElementById("grid");
+
+    // Save current colored cell state to reapply after resize
+    const oldCells = Array.from(grid.children);
+    const oldState = oldCells.map((cell) => ({
+        isColored: cell.classList.contains("colored"),
+        isBlinking: cell.classList.contains("blink-animation"), // Save blink state
+        isCenterDot: cell.classList.contains("center-dot"),
+    }));
+
+    grid.innerHTML = "";
+    const cellSize = 20;
+    const columns = Math.floor(window.innerWidth / cellSize);
+    const rows = Math.floor(window.innerHeight / cellSize);
+    const totalCells = columns * rows;
+
+    grid.style.gridTemplateColumns = `repeat(${columns}, ${cellSize}px)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+
+    let currentCenterDotIndex = -1;
+    // Check if there was a custom center dot in the old grid
+    for (let i = 0; i < oldState.length; i++) {
+        if (oldState[i].isCenterDot) {
+            // Recalculate its position based on new grid dimensions if possible
+            const oldCol =
+                i %
+                (oldCells[0]
+                    ? Math.floor(window.innerWidth / cellSize)
+                    : columns); // Handle initial load
+            const oldRow = Math.floor(
+                i /
+                    (oldCells[0]
+                        ? Math.floor(window.innerWidth / cellSize)
+                        : columns)
+            );
+
+            if (oldCol < columns && oldRow < rows) {
+                currentCenterDotIndex = oldRow * columns + oldCol;
+            }
+            break;
+        }
+    }
+
+    for (let i = 0; i < totalCells; i++) {
+        const cell = document.createElement("div");
+        cell.className = "grid-cell";
+
+        // Reapply old state if it exists for the current cell
+        if (oldState[i]) {
+            if (oldState[i].isColored) {
+                cell.classList.add("colored");
+            }
+            if (oldState[i].isBlinking) {
+                // Reapply blink state
+                cell.classList.add("blink-animation");
+            }
+        }
+
+        cell.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            isMouseDown = true;
+            eraseMode = e.button === 2; // Right-click for erase
+            paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+        });
+
+        cell.addEventListener("mouseover", (e) => {
+            if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+        });
+
+        cell.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+        });
+
+        grid.appendChild(cell);
+    }
+
+    // Mark the center dot
+    if (currentCenterDotIndex === -1) {
+        // If no custom center dot was found or it was out of bounds, use default
+        const centerCol = Math.floor(columns / 2);
+        const centerRow = Math.floor(rows / 2);
+        currentCenterDotIndex = centerRow * columns + centerCol;
+    }
+
+    if (grid.children[currentCenterDotIndex]) {
+        grid.children[currentCenterDotIndex].classList.add("center-dot");
+    }
+}
+
+/**
+ * Draws a fixed-size grid with specified columns and rows.
+ * This is useful for scenarios where the grid size should not change with window resizing.
+ * It also maintains a center dot and allows for coloring, blinking, and erasing cells.
+ *
+ * @param {number} columns - The number of columns in the grid.
+ * @param {number} rows - The number of rows in the grid.
+ */
+function drawGridFixed(columns, rows) {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    const cellSize = 20;
+    grid.style.gridTemplateColumns = `repeat(${columns}, ${cellSize}px)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+
+    for (let i = 0; i < columns * rows; i++) {
+        const cell = document.createElement("div");
+        cell.className = "grid-cell";
+
+        cell.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            isMouseDown = true;
+            eraseMode = e.button === 2;
+            paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+        });
+
+        cell.addEventListener("mouseover", (e) => {
+            if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+        });
+
+        cell.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+        });
+
+        grid.appendChild(cell);
+    }
+
+    // Mark the default center dot initially
+    const centerCol = Math.floor(columns / 2);
+    const centerRow = Math.floor(rows / 2);
+    const centerIndex = centerRow * columns + centerCol;
+    if (grid.children[centerIndex]) {
+        grid.children[centerIndex].classList.add("center-dot");
+    }
+}
+
+/**
+ * Paints a cell based on the current mode (coloring, blinking, erasing).
+ *
+ * @param {HTMLElement} cell - The grid cell to paint.
+ * @param {boolean} ctrlPressed - Whether the Ctrl key is pressed.
+ * @param {boolean} shiftPressed - Whether the Shift key is pressed.
+ */
+function paintCell(cell, ctrlPressed, shiftPressed) {
+    if (shiftPressed) {
+        moveCenterDot(cell);
+    } else if (ctrlPressed) {
+        cell.classList.toggle("blink-animation");
+    } else if (eraseMode) {
+        cell.classList.remove("colored");
+        cell.classList.remove("blink-animation"); // Stop blinking when erased
+    } else {
+        cell.classList.add("colored");
+    }
+}
+
+/**
+ * Moves the center dot to a new cell.
+ * It removes the current center dot class from any existing cell and adds it to the new cell.
+ *
+ * @param {HTMLElement} newCenterCell - The cell to become the new center dot.
+ */
+function moveCenterDot(newCenterCell) {
+    const currentCenter = document.querySelector(".center-dot");
+    if (currentCenter) {
+        currentCenter.classList.remove("center-dot");
+    }
+    newCenterCell.classList.add("center-dot");
+}
+
+/**
+ * Generates a string representation of the grid data.
+ * This string includes the grid size, colored ranges, blinking cells, and any custom center dot position.
+ * It also encodes the string in base64 for easier sharing.
+ *
+ * @param {number} columns - The number of columns in the grid.
+ * @param {number} rows - The number of rows in the grid.
+ * @returns {string} - The base64 encoded string representation of the grid data.
+ */
+function getGridDataString(columns, rows) {
+    const grid = document.getElementById("grid");
+    const cells = grid.children;
+    let output = `W[${columns}x${rows}]`;
+
+    const currentCenterDot = document.querySelector(".center-dot");
+    if (currentCenterDot) {
+        const index = Array.from(cells).indexOf(currentCenterDot);
+        const centerCol = index % columns;
+        const centerRow = Math.floor(index / columns);
+        // Only add if it's not the default center
+        if (
+            centerCol !== Math.floor(columns / 2) ||
+            centerRow !== Math.floor(rows / 2)
+        ) {
+            output += `C[${centerRow + 1},${centerCol + 1}]`;
+        }
+    }
+
+    for (let row = 0; row < rows; row++) {
+        let rowRanges = [];
+        let rowBlinks = [];
+        let currentRangeStart = null;
+
+        for (let col = 0; col < columns; col++) {
+            const index = row * columns + col;
+            const cell = cells[index];
+            const isColored = cell?.classList.contains("colored");
+            const isBlinking = cell?.classList.contains("blink-animation");
+
+            if (isColored && currentRangeStart === null) {
+                currentRangeStart = col + 1;
+            } else if (!isColored && currentRangeStart !== null) {
+                rowRanges.push(`[${currentRangeStart}-${col}]`);
+                currentRangeStart = null;
+            }
+
+            if (isBlinking) {
+                rowBlinks.push(col + 1); // Store just the column number
+            }
+        }
+
+        if (currentRangeStart !== null) {
+            rowRanges.push(`[${currentRangeStart}-${columns}]`); // Close any open range at the end of the row
+        }
+
+        if (rowRanges.length > 0 || rowBlinks.length > 0) {
+            let rowSegment = `R${row + 1}`;
+            if (rowRanges.length > 0) {
+                rowSegment += rowRanges.join("");
+            }
+            if (rowBlinks.length > 0) {
+                rowSegment += `BR[${rowBlinks.join(",")}]`; // New BR token
+            }
+            output += rowSegment;
+        }
+    }
+
+    // Add theme and orientation to the encoded string
+    const isDark = document.body.classList.contains("dark");
+    const isGridX = document.body.classList.contains("grid-x");
+    const isGridY = document.body.classList.contains("grid-y");
+
+    if (isDark) output += "T[D]"; // Dark theme
+    if (isGridX) output += "O[X]"; // Grid X orientation
+    if (isGridY) output += "O[Y]"; // Grid Y orientation
+
+    return btoa(output); // encode to base64
+}
+
+/**
+ * Loads grid data from a base64 encoded string.
+ * It decodes the string, extracts grid size, theme, orientation, and cell data,
+ * and then draws the grid with the specified parameters.
+ *
+ * @param {string} encodedData - The base64 encoded string representing the grid data.
+ */
+function loadGridDataFromString(encodedData) {
+    const decoded = atob(encodedData);
+    const grid = document.getElementById("grid");
+
+    const sizeMatch = decoded.match(/^W\[(\d+)x(\d+)\]/);
+    if (!sizeMatch) return;
+    const columns = parseInt(sizeMatch[1]);
+    const rows = parseInt(sizeMatch[2]);
+
+    drawGridFixed(columns, rows); // create grid with fixed size
+
+    const cells = grid.children;
+    // Extract grid data, excluding size, theme, and orientation info
+    let data = decoded.slice(sizeMatch[0].length);
+
+    // Check for theme and apply
+    const themeMatch = data.match(/T\[(D)\]/);
+    if (themeMatch && themeMatch[1] === "D") {
+        document.body.classList.add("dark");
+        data = data.replace(themeMatch[0], ""); // Remove theme info from data
+    }
+
+    // Check for grid orientation and apply
+    const orientationMatch = data.match(/O\[(X|Y)\]/);
+    if (orientationMatch) {
+        if (orientationMatch[1] === "X") {
+            document.body.classList.add("grid-x");
+        } else if (orientationMatch[1] === "Y") {
+            document.body.classList.add("grid-y");
+        }
+        data = data.replace(orientationMatch[0], ""); // Remove orientation info from data
+    }
+
+    // Check for custom center dot position
+    const centerMatch = data.match(/C\[(\d+),(\d+)\]/);
+    if (centerMatch) {
+        const centerRow = parseInt(centerMatch[1]) - 1;
+        const centerCol = parseInt(centerMatch[2]) - 1;
+        const newCenterIndex = centerRow * columns + centerCol;
+        if (cells[newCenterIndex]) {
+            // Remove existing center dot class (if any)
+            const currentCenter = document.querySelector(".center-dot");
+            if (currentCenter) {
+                currentCenter.classList.remove("center-dot");
+            }
+            cells[newCenterIndex].classList.add("center-dot");
+        }
+        data = data.replace(centerMatch[0], ""); // Remove center info from data
+    }
+
+    // Regex to match R segments (colored ranges) and BR segments (blinking cells)
+    const rowSegmentRegex = /(R\d+(\[\d+-\d+\])*)?(BR\[[\d,]+\])?/g;
+    const rangeRegex = /\[(\d+)-(\d+)\]/g;
+    const brRegex = /BR\[([\d,]+)\]/; // To extract columns from BR token
+
+    let rowMatch;
+    // Create an array to hold all row data to parse them correctly
+    const rowData = {};
+
+    // First, extract all row data including ranges and blinking info
+    let tempMatch;
+    // Loop through the data to find all R and BR segments for each row
+    // We can't use rowSegmentRegex directly because it processes parts of the string
+    // independently. Instead, we need to iterate through row by row in the decoded string.
+
+    // Simpler: Split the main data string by "R" or "BR" to isolate row segments
+    const segments = data.split(/(R\d+|BR\[[\d,]+\])/).filter(Boolean); // Filters out empty strings from split
+
+    let currentRow = -1;
+    let currentRanges = "";
+    let currentBlinks = "";
+
+    // Reconstruct segments based on row numbers
+    for (let i = 0; i < segments.length; i++) {
+        const segment = segments[i];
+        if (segment.startsWith("R")) {
+            const rowNumMatch = segment.match(/R(\d+)/);
+            if (rowNumMatch) {
+                const newRow = parseInt(rowNumMatch[1]) - 1;
+                // If we're starting a new row, store previous row data
+                if (currentRow !== -1 && (currentRanges || currentBlinks)) {
+                    rowData[currentRow] = {
+                        ranges: currentRanges,
+                        blinks: currentBlinks,
+                    };
+                }
+                currentRow = newRow;
+                currentRanges = segment.slice(rowNumMatch[0].length);
+                currentBlinks = ""; // Reset for new row
+            }
+        } else if (segment.startsWith("BR[")) {
+            if (currentRow !== -1) {
+                // Ensure it's associated with a row
+                currentBlinks = segment;
+            }
+        } else if (currentRow !== -1) {
+            // If it's a continuation of ranges for the current row
+            currentRanges += segment;
+        }
+    }
+    // Store the last row's data
+    if (currentRow !== -1 && (currentRanges || currentBlinks)) {
+        rowData[currentRow] = {
+            ranges: currentRanges,
+            blinks: currentBlinks,
+        };
+    }
+
+    // Now, iterate through the collected row data and apply to grid
+    for (const row in rowData) {
+        if (rowData.hasOwnProperty(row)) {
+            const rowObj = rowData[row];
+            const rangesStr = rowObj.ranges;
+            const blinkStr = rowObj.blinks;
+
+            // Process ranges
+            let rangeMatch;
+            while ((rangeMatch = rangeRegex.exec(rangesStr)) !== null) {
+                const start = parseInt(rangeMatch[1]) - 1;
+                const end = parseInt(rangeMatch[2]) - 1;
+                for (let col = start; col <= end; col++) {
+                    const index = row * columns + col;
+                    if (cells[index]) cells[index].classList.add("colored");
+                }
+            }
+            rangeRegex.lastIndex = 0; // Reset for next iteration
+
+            // Process blinking cells
+            const brMatch = blinkStr.match(brRegex);
+            if (brMatch) {
+                const blinkCols = brMatch[1].split(",").map(Number);
+                blinkCols.forEach((colNum) => {
+                    const col = colNum - 1;
+                    const index = row * columns + col;
+                    if (cells[index]) {
+                        cells[index].classList.add("blink-animation");
+                    }
+                });
+            }
+        }
+    }
+}
+
+/**
+ * Copies the current grid state as a shareable link.
+ * It generates a URL with the grid data encoded in base64 format.
+ * If rain mode is active, it alerts the user to disable it first.
+ */
+function copyShareLink() {
+    if (rainMode) {
+        alert("Disable Rain Mode to share.");
+        return;
+    }
+
+    const grid = document.getElementById("grid");
+    const columns = parseInt(
+        getComputedStyle(grid).gridTemplateColumns.split(" ").length
+    );
+    const rows = parseInt(
+        getComputedStyle(grid).gridTemplateRows.split(" ").length
+    );
+    const dataStr = getGridDataString(columns, rows);
+    const url = new URL(window.location.href);
+    url.searchParams.set("data", dataStr);
+    navigator.clipboard.writeText(url.toString());
+    alert("Link copied!");
+}
+
+/**
+ * Starts the rain mode animation.
+ * It creates a rain effect by randomly dropping colored cells down the grid.
+ * Each drop has a tail length, and the cells blink as they fall.
+ */
+function startRain() {
+    const grid = document.getElementById("grid");
+    const cells = grid.children;
+    const columns = parseInt(
+        getComputedStyle(grid).gridTemplateColumns.split(" ").length
+    );
+    const rows = parseInt(
+        getComputedStyle(grid).gridTemplateRows.split(" ").length
+    );
+    const tailLength = 4;
+
+    rainInterval = setInterval(() => {
+        const col = Math.floor(Math.random() * columns);
+        let currentRow = 0;
+
+        const drop = setInterval(() => {
+            // Clear the cell that's now behind the tail
+            const clearIndex = (currentRow - tailLength) * columns + col;
+            if (currentRow >= tailLength && cells[clearIndex]) {
+                cells[clearIndex].classList.remove("colored");
+                cells[clearIndex].classList.remove("blink-animation"); // Ensure blinking stops
+            }
+
+            // Add the new cell to the tail
+            const index = currentRow * columns + col;
+            if (cells[index]) {
+                cells[index].classList.add("colored");
+            }
+
+            currentRow++;
+
+            if (currentRow >= rows + tailLength) {
+                clearInterval(drop);
+            }
+        }, 50);
+    }, 300);
+}
+
+/**
+ * Toggles the dark theme for the grid.
+ * It adds or removes the "dark" class from the body element.
+ * This changes the background and text colors for better visibility.
+ */
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+}
+
+/**
+ * Toggles the grid orientation between horizontal and vertical.
+ * It switches the grid layout by adding or removing classes.
+ * If the grid is currently horizontal, it switches to vertical and vice versa.
+ */
+function toggleGridOrientation() {
+    if (document.body.classList.contains("grid-x")) {
+        document.body.classList.remove("grid-x");
+        document.body.classList.add("grid-y");
+    } else if (document.body.classList.contains("grid-y")) {
+        document.body.classList.remove("grid-y");
+    } else {
+        document.body.classList.add("grid-x");
+    }
+}
+
+/**
+ * Adjusts the zoom level of the grid.
+ * It scales the grid wrapper element based on the zoom level.
+ * The zoom level is clamped between 0.1 and 3.
+ * @param {number} delta - The amount to adjust the zoom level by.
+ */
+function adjustZoom(delta) {
+    zoomLevel = Math.max(0.1, Math.min(3, zoomLevel + delta));
+    wrapper.style.transform = `scale(${zoomLevel})`;
+}
+
+/**
+ * Shows the controls for a brief period when the mouse moves.
+ * It removes the "hidden" class from the controls element and sets a timeout to hide it
+ * after 3 seconds of inactivity.
+ */
+function showControls() {
+    controls.classList.remove("hidden");
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+        controls.classList.add("hidden");
+    }, 3000);
+}
+
+/**
+ * Toggles the rain mode on or off.
+ * When rain mode is active, it starts the rain animation.
+ * When rain mode is deactivated, it clears the rain interval and removes all colored cells.
+ */
+function toggleRainMode() {
+    const btn = document.getElementById("rain-toggle");
+    rainMode = !rainMode;
+    if (rainMode) {
+        startRain();
+        btn.classList.add("active");
+    } else {
+        clearInterval(rainInterval);
+        // Clear all colored cells when exiting rain mode
+        document
+            .querySelectorAll(".grid-cell.colored, .grid-cell.blink-animation") // Clear blinking cells too
+            .forEach((cell) => {
+                cell.classList.remove("colored");
+                cell.classList.remove("blink-animation");
+            });
+        btn.classList.remove("active");
+    }
+}
+
+/**  ## Event Listeners ## */
+window.addEventListener("mouseup", () => {
+    isMouseDown = false;
+});
+
+// Prevent right-click context menu since it is used for erasing
+window.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+});
+
+// Handle keyboard shortcuts
+window.addEventListener("keydown", (e) => {
+    showControls();
+    if (e.ctrlKey) {
+        // Invert colors
+        if (e.key.toLowerCase() === "i") {
+            e.preventDefault();
+            toggleTheme();
+        }
+        // Toggle grid orientation
+        else if (e.key.toLowerCase() === "o") {
+            e.preventDefault();
+            toggleGridOrientation();
+        }
+        // Copy share link
+        else if (e.key.toLowerCase() === "s") {
+            e.preventDefault();
+            copyShareLink();
+        }
+        // Toggle rain mode
+        else if (e.key.toLowerCase() === "r") {
+            e.preventDefault();
+            toggleRainMode();
+        }
+        // Zoom in or out
+        else if (e.key === "+" || e.key === "=" || e.key === "Add") {
+            e.preventDefault();
+            adjustZoom(0.1);
+        } else if (e.key === "-" || e.key === "Subtract") {
+            e.preventDefault();
+            adjustZoom(-0.1);
+        }
+    } else if (e.code === "Space") {
+        e.preventDefault();
+        document
+            .querySelectorAll(".grid-cell.colored, .grid-cell.blink-animation") // Clear blinking cells too
+            .forEach((cell) => {
+                cell.classList.remove("colored");
+                cell.classList.remove("blink-animation");
+            });
+    }
+});
+
+// Handle mouse and touch events for painting cells
+window.addEventListener("mousemove", showControls);
+
+// Load grid data from URL parameters or draw default grid
+window.addEventListener("load", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get("data");
+
+    if (data) {
+        loadGridDataFromString(data);
+    } else {
+        drawGrid(); // default (responsive)
+        window.addEventListener("resize", drawGrid);
+    }
+
+    showControls();
+});

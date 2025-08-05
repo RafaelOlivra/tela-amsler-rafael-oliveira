@@ -1,3 +1,9 @@
+/**
+ * ==========================================
+ * Styles - Tela de Amsler Responsiva
+ * ==========================================
+ */
+
 :root {
     --bg-color: #ffffff;
     --line-color: #000000;
@@ -45,6 +51,18 @@ body {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
+
+    &.colored {
+        background-color: var(--cell-color);
+    }
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--cell-color), #fff 10%);
+    }
+
+    &.blink-animation {
+        animation: blink 1s infinite;
+    }
 }
 
 body.grid-y .grid-cell {
@@ -57,32 +75,22 @@ body.grid-x .grid-cell {
     border-right: 0;
 }
 
-.grid-cell.colored {
-    background-color: var(--cell-color);
-}
-
-.grid-cell:hover {
-    background-color: color-mix(in srgb,
-            var(--cell-color),
-            #fff 10%);
-}
-
 .center-dot {
     position: relative;
     background-color: var(--dot-color) !important;
     border: none;
-}
 
-.center-dot::after {
-    content: "";
-    position: absolute;
-    width: 30%;
-    height: 30%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: var(--bg-color);
+    &::after {
+        content: "";
+        position: absolute;
+        width: 30%;
+        height: 30%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: var(--bg-color);
+    }
 }
 
 #controls {
@@ -96,15 +104,14 @@ body.grid-x .grid-cell {
     gap: 5px;
     transition: opacity 0.4s ease;
     padding: 10px;
+
+    &.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
-#controls.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.toggle-button,
-.zoom-button {
+button {
     position: relative;
     padding: 5px 10px;
     background-color: var(--button-bg-color);
@@ -115,76 +122,60 @@ body.grid-x .grid-cell {
     cursor: pointer;
     transition: background-color 0.3s;
     zoom: 0.95;
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--button-bg-color), #fff 10%);
+    }
+
+    &.active {
+        background-color: color-mix(in srgb, var(--button-bg-color), #fff 20%);
+    }
+
+    span {
+        position: absolute;
+        background: color-mix(in srgb, var(--button-bg-color), #000 20%);
+        display: none;
+        font-size: 60%;
+        padding: 3px 5px;
+        border-radius: 5px;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 1px solid var(--line-color);
+        opacity: 0;
+    }
+
+    &:hover span,
+    &:focus span {
+        opacity: 1;
+    }
 }
 
-.toggle-button:hover,
-.zoom-button:hover {
-    background-color: color-mix(in srgb,
-            var(--button-bg-color),
-            #fff 10%);
-}
+body.dark {
+    .button {
+        background-color: rgba(255, 255, 255, 0.2);
+        text-shadow: 0 0 2px #000;
+        box-shadow: 0 0 0 1px rgb(0 0 0 / 0.8);
 
-.toggle-button.active {
-    background-color: color-mix(in srgb,
-            var(--button-bg-color),
-            #fff 20%);
-}
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
 
-button span {
-    position: absolute;
-    background: color-mix(in srgb,
-            var(--button-bg-color),
-            #000 20%);
-    display: block;
-    font-size: 60%;
-    padding: 3px 5px;
-    border-radius: 5px;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 1px solid var(--line-color);
-    opacity: 0;
-
-    /* Disabled by default */
-    display: none;
-}
-
-button:hover span,
-button:focus span {
-    opacity: 1;
-}
-
-body.dark .toggle-button,
-body.dark .zoom-button {
-    background-color: rgba(255, 255, 255, 0.2);
-    text-shadow: 0 0 2px #000;
-    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.8);
-}
-
-body.dark .toggle-button:hover,
-body.dark .zoom-button:hover {
-    background-color: rgba(255, 255, 255, 0.4);
-}
-
-body.dark .toggle-button.active {
-    background-color: rgba(255, 255, 255, 1);
-    color: black;
+        &.active {
+            background-color: rgba(255, 255, 255, 1);
+            color: black;
+        }
+    }
 }
 
 @keyframes blink {
-
     0%,
     100% {
         background-color: var(--cell-color);
     }
-
     50% {
         background-color: transparent;
     }
-}
-
-.grid-cell.blink-animation {
-    animation: blink 1s infinite;
 }
 
 @media print {

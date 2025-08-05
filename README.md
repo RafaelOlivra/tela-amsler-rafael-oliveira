@@ -38,11 +38,12 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 
 ## ⚙️ Clonar e modificar
 
-1.  Clone o repositório:
+1.  Clone o repositório e compile os assets:
 
     ```bash
-    git clone https://github.com/seuusuario/tela-amsler-rainmode.git
+    git clone git@github.com:RafaelOlivra/tela-amsler-rafael-oliveira.git
     cd tela-amsler-rainmode
+    bash ./build.sh
     ```
 
 2.  Abra o arquivo HTML diretamente no navegador:
