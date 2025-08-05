@@ -8,9 +8,9 @@
 let isMouseDown = false;
 let eraseMode = false;
 let zoomLevel = 1;
-let hideTimeout;
 let rainMode = false;
 let rainInterval;
+const timeoutDuration = 60000;
 
 /**
  * Draws the grid dynamically based on the window size.
@@ -441,7 +441,7 @@ function copyShareLink() {
     const url = new URL(window.location.href);
     url.searchParams.set("data", dataStr);
     navigator.clipboard.writeText(url.toString());
-    alert("Link copied!");
+    alert("Link copiado!");
 }
 
 /**
@@ -497,6 +497,20 @@ function toggleTheme() {
 }
 
 /**
+ * Toggles a class on an element.
+ * It checks if the element has the specified class and adds or removes it accordingly.
+ * @param {HTMLElement} element - The element to toggle the class on.
+ * @param {string} className - The class name to toggle.
+ */
+function toggleClass(element, className) {
+    if (element.classList.contains(className)) {
+        element.classList.remove(className);
+    } else {
+        element.classList.add(className);
+    }
+}
+
+/**
  * Toggles the grid orientation between horizontal and vertical.
  * It switches the grid layout by adding or removing classes.
  * If the grid is currently horizontal, it switches to vertical and vice versa.
@@ -524,16 +538,31 @@ function adjustZoom(delta) {
 }
 
 /**
+ * Toggles fullscreen mode for the document.
+ * It checks if the document is currently in fullscreen mode and requests or exits fullscreen accordingly.
+ */
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+/**
  * Shows the controls for a brief period when the mouse moves.
  * It removes the "hidden" class from the controls element and sets a timeout to hide it
  * after 3 seconds of inactivity.
  */
 function showControls() {
+    let hideTimeout = null;
     controls.classList.remove("hidden");
     clearTimeout(hideTimeout);
     hideTimeout = setTimeout(() => {
         controls.classList.add("hidden");
-    }, 3000);
+    }, timeoutDuration);
 }
 
 /**
@@ -542,11 +571,10 @@ function showControls() {
  * When rain mode is deactivated, it clears the rain interval and removes all colored cells.
  */
 function toggleRainMode() {
-    const btn = document.getElementById("rain-toggle");
     rainMode = !rainMode;
     if (rainMode) {
         startRain();
-        btn.classList.add("active");
+        document.body.classList.add("rain-mode");
     } else {
         clearInterval(rainInterval);
         // Clear all colored cells when exiting rain mode
@@ -556,7 +584,7 @@ function toggleRainMode() {
                 cell.classList.remove("colored");
                 cell.classList.remove("blink-animation");
             });
-        btn.classList.remove("active");
+        document.body.classList.remove("rain-mode");
     }
 }
 
@@ -572,7 +600,6 @@ window.addEventListener("contextmenu", (e) => {
 
 // Handle keyboard shortcuts
 window.addEventListener("keydown", (e) => {
-    showControls();
     if (e.ctrlKey) {
         // Invert colors
         if (e.key.toLowerCase() === "i") {
@@ -613,9 +640,6 @@ window.addEventListener("keydown", (e) => {
     }
 });
 
-// Handle mouse and touch events for painting cells
-window.addEventListener("mousemove", showControls);
-
 // Load grid data from URL parameters or draw default grid
 window.addEventListener("load", () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -627,6 +651,4 @@ window.addEventListener("load", () => {
         drawGrid(); // default (responsive)
         window.addEventListener("resize", drawGrid);
     }
-
-    showControls();
 });

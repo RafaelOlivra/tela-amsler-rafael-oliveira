@@ -9,7 +9,7 @@
     --line-color: #000000;
     --dot-color: #000000;
     --cell-color: rgb(194, 13, 13);
-    --button-bg-color: rgba(0, 0, 0, 0.7);
+    --button-bg-color: rgba(0, 0, 0, 0.8);
     --button-text-color: white;
 }
 
@@ -18,8 +18,8 @@ body.dark {
     --line-color: #ffffff;
     --dot-color: #ffffff;
     --cell-color: #ffffff;
-    --button-bg-color: rgba(255, 255, 255, 0.2);
-    --button-text-color: white;
+    --button-bg-color: rgba(255, 255, 255, 0.9);
+    --button-text-color: black;
 }
 
 html,
@@ -30,6 +30,10 @@ body {
     width: 100%;
     background-color: var(--bg-color);
     overflow: hidden;
+}
+
+body {
+    font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
 .grid-wrapper {
@@ -121,17 +125,25 @@ button {
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s;
-    zoom: 0.95;
+    zoom: 1;
 
     &:hover {
-        background-color: color-mix(in srgb, var(--button-bg-color), #fff 10%);
+        background-color: color-mix(
+            in srgb,
+            var(--button-bg-color),
+            var(--line-color) 5%
+        );
     }
 
     &.active {
-        background-color: color-mix(in srgb, var(--button-bg-color), #fff 20%);
+        background-color: color-mix(
+            in srgb,
+            var(--button-bg-color),
+            var(--line-color) 20%
+        );
     }
 
-    span {
+    .label {
         position: absolute;
         background: color-mix(in srgb, var(--button-bg-color), #000 20%);
         display: none;
@@ -149,23 +161,112 @@ button {
     &:focus span {
         opacity: 1;
     }
-}
 
-body.dark {
-    .button {
-        background-color: rgba(255, 255, 255, 0.2);
-        text-shadow: 0 0 2px #000;
-        box-shadow: 0 0 0 1px rgb(0 0 0 / 0.8);
+    .dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--button-bg-color);
+        color: var(--button-text-color);
+        border-radius: 5px;
+        border: 1px solid var(--line-color);
+        width: 220px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+        display: block;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(15px);
+        transition: all 0.3s ease;
 
-        &:hover {
-            background-color: rgba(255, 255, 255, 0.4);
-        }
+        li {
+            margin-top: -1px;
 
-        &.active {
-            background-color: rgba(255, 255, 255, 1);
-            color: black;
+            a {
+                display: block;
+                padding: 8px 10px;
+                color: inherit;
+                text-decoration: none;
+                border-top: 1px solid transparent;
+                border-bottom: 1px solid transparent;
+
+                &:hover,
+                &.active,
+                .rain-mode &.rain-toggle {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--button-bg-color),
+                        var(--button-text-color) 10%
+                    );
+                    border-color: color-mix(
+                        in srgb,
+                        var(--button-bg-color),
+                        var(--button-text-color) 25%
+                    );
+                }
+
+                &:active {
+                    background-color: color-mix(
+                        in srgb,
+                        var(--button-bg-color),
+                        var(--button-text-color) 5%
+                    ) !important;
+                }
+
+                i {
+                    margin-right: 5px;
+                    text-decoration: none;
+                    font-style: normal;
+                }
+
+                span {
+                    position: relative;
+                    font-family: monospace;
+                    font-size: 0.8em;
+                    opacity: 0.6;
+                    float: right;
+                    line-height: 1;
+                    margin-top: 0.4em;
+                }
+            }
+
+            &:first-child a {
+                border-top: none;
+            }
+
+            &:last-child a {
+                border-bottom: none;
+            }
+
+            &.spaced {
+                margin-top: 10px;
+            }
         }
     }
+
+    &:hover .dropdown,
+    &:focus .dropdown,
+    &:active .dropdown,
+    &.active .dropdown,
+    .dropdown:hover {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(5px);
+    }
+}
+
+// body.dark {
+//     .button {
+//         text-shadow: 0 0 2px #000;
+//         box-shadow: 0 0 0 1px rgb(0 0 0 / 0.8);
+//     }
+// }
+
+.rain-mode .rain-toggle {
+    font-weight: bold;
 }
 
 @keyframes blink {

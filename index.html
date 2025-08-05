@@ -30,48 +30,93 @@
 
     <body>
         <div id="controls">
-            <button
-                class="zoom-button zoom-in"
-                onclick="adjustZoom(0.1)"
-                title="Aumentar zoom (Ctrl + +)"
-            >
-                +<span>Aumentar zoom</span>
-            </button>
-            <button
-                class="zoom-button zoom-out"
-                onclick="adjustZoom(-0.1)"
-                title="Diminuir zoom (Ctrl + -)"
-            >
-                –<span>Diminuir zoom</span>
-            </button>
-            <button
-                class="toggle-button"
-                onclick="toggleTheme()"
-                title="Inverter cores (Ctrl + I)"
-            >
-                🌓<span>Inverter cores</span>
-            </button>
-            <button
-                class="toggle-button"
-                onclick="toggleGridOrientation()"
-                title="Mudar orientação da grade (Ctrl + O)"
-            >
-                🔄<span>Mudar Grade</span>
-            </button>
-            <button
-                id="rain-toggle"
-                class="toggle-button"
-                onclick="toggleRainMode()"
-                title="Ativar/Desativar Modo Chuva (Ctrl + R)"
-            >
-                🌧️<span>Modo Chuva</span>
-            </button>
-            <button
-                class="toggle-button"
-                onclick="copyShareLink()"
-                title="Compartilhar grade (Ctrl + S)"
-            >
-                🔗<span>Compartilhar</span>
+            <button class="menu-button" title="Menu">
+                ☰<span class="label">Menu</span>
+
+                <ul class="dropdown">
+                    <li>
+                        <a
+                            href="#"
+                            onclick="adjustZoom(0.1)"
+                            title="Aumentar zoom (Ctrl + +)"
+                        >
+                            <i>➕</i> Aumentar zoom
+                            <span>(Ctrl + +)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            onclick="adjustZoom(-0.1)"
+                            title="Diminuir zoom (Ctrl + -)"
+                        >
+                            <i>➖</i> Diminuir zoom
+                            <span>(Ctrl + -)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            onclick="toggleTheme()"
+                            title="Inverter cores (Ctrl + I)"
+                        >
+                            <i>🌗</i> Inverter cores
+                            <span>(Ctrl + I)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            onclick="toggleGridOrientation()"
+                            title="Mudar orientação da grade (Ctrl + O)"
+                        >
+                            <i>🔄</i> Mudar Grade
+                            <span>(Ctrl + O)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            onclick="toggleRainMode()"
+                            title="Ativar/Desativar Modo Chuva (Ctrl + R)"
+                            class="rain-toggle"
+                        >
+                            <i>🌧️</i> Modo Chuva
+                            <span>(Ctrl + R)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            onclick="toggleFullscreen()"
+                            title="Alternar tela cheia (Ctrl + F)"
+                        >
+                            <i>↕️</i> Tela Cheia
+                            <span>(F12)</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a
+                            href="#"
+                            onclick="copyShareLink()"
+                            title="Compartilhar grade (Ctrl + S)"
+                        >
+                            <i>🔗</i> Compartilhar
+                            <span>(Ctrl + S)</span>
+                        </a>
+                    </li>
+                    <li class="spaced">
+                        <a
+                            href="https://rafaeloliveiradesign.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Rafael Oliveira Design — Portfólio e Serviços"
+                        >
+                            <i>🌐</i> Rafael Oliveira Design
+                        </a>
+                    </li>
+                </ul>
             </button>
         </div>
 
