@@ -30,9 +30,6 @@ body {
     width: 100%;
     background-color: var(--bg-color);
     overflow: hidden;
-}
-
-body {
     font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -67,16 +64,16 @@ body {
     &.blink-animation {
         animation: blink 1s infinite;
     }
-}
 
-body.grid-y .grid-cell {
-    border-top: 0;
-    border-bottom: 0;
-}
+    body.grid-y & {
+        border-top: 0;
+        border-bottom: 0;
+    }
 
-body.grid-x .grid-cell {
-    border-left: 0;
-    border-right: 0;
+    body.grid-x & {
+        border-left: 0;
+        border-right: 0;
+    }
 }
 
 .center-dot {
@@ -257,13 +254,6 @@ button {
         transform: translateY(5px);
     }
 }
-
-// body.dark {
-//     .button {
-//         text-shadow: 0 0 2px #000;
-//         box-shadow: 0 0 0 1px rgb(0 0 0 / 0.8);
-//     }
-// }
 
 .rain-mode .rain-toggle {
     font-weight: bold;
