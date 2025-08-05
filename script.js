@@ -647,6 +647,14 @@ window.addEventListener("load", () => {
 
     if (data) {
         loadGridDataFromString(data);
+
+        // Clear the URL parameter after loading
+        urlParams.delete("data");
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
     } else {
         drawGrid(); // default (responsive)
         window.addEventListener("resize", drawGrid);
