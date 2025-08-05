@@ -42,7 +42,7 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 
     ```bash
     git clone git@github.com:RafaelOlivra/tela-amsler-rafael-oliveira.git
-    cd tela-amsler-rainmode
+    cd tela-amsler-rafael-oliveira
     bash ./build.sh
     ```
 
