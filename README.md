@@ -31,10 +31,11 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 | Diminuir zoom              | `Ctrl` + `-`               |
 | Inverter cores             | `Ctrl` + `I`               |
 | Limpar marcações           | `Espaço`                   |
-| Ativar/Desativar chuva     | `Ctrl` + `R` ou botão      |
+| Ativar/Desativar chuva     | `Ctrl` + `R`               |
+| Tela Cheia                 | `F11`                      |
 | **Mover ponto central**    | `Ctrl` + clique na célula  |
 | **Marcar célula piscando** | `Shift` + clique na célula |
-| **Compartilhar grade**     | `Ctrl` + `S` ou botão      |
+| **Compartilhar grade**     | `Ctrl` + `S`               |
 
 ## ⚙️ Clonar e modificar
 
