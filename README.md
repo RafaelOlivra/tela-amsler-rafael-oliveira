@@ -32,8 +32,8 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 | Inverter cores             | `Ctrl` + `I`               |
 | Limpar marcações           | `Espaço`                   |
 | Ativar/Desativar chuva     | `Ctrl` + `R` ou botão      |
-| **Mover ponto central**    | `Shift` + clique na célula |
-| **Marcar célula piscando** | `Ctrl` + clique na célula  |
+| **Mover ponto central**    | `Ctrl` + clique na célula  |
+| **Marcar célula piscando** | `Shift` + clique na célula |
 | **Compartilhar grade**     | `Ctrl` + `S` ou botão      |
 
 ## ⚙️ Clonar e modificar
