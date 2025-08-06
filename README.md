@@ -46,6 +46,8 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
     bash ./build.sh
     ```
 
+    \*Você pode passar a flag `--watch` para compilar os assets conforme os arquivos são modificados.
+
 2.  Abra o arquivo HTML diretamente no navegador:
 
     ```

@@ -8,8 +8,6 @@ fi
 
 if [ ! -d "dist" ]; then
     mkdir dist
-    echo "Pasta 'dist' criada. Instalando dependências..."
-    npm install -g esbuild sass
 fi
 
 if [ "$WATCH_MODE" = true ]; then
