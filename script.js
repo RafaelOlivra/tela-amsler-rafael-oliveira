@@ -164,9 +164,9 @@ function drawGridFixed(columns, rows) {
  * @param {boolean} shiftPressed - Whether the Shift key is pressed.
  */
 function paintCell(cell, ctrlPressed, shiftPressed) {
-    if (shiftPressed) {
+    if (ctrlPressed) {
         moveCenterDot(cell);
-    } else if (ctrlPressed) {
+    } else if (shiftPressed) {
         cell.classList.toggle("blink-animation");
     } else if (eraseMode) {
         cell.classList.remove("colored");
@@ -327,21 +327,13 @@ function loadGridDataFromString(encodedData) {
     }
 
     // Regex to match R segments (colored ranges) and BR segments (blinking cells)
-    const rowSegmentRegex = /(R\d+(\[\d+-\d+\])*)?(BR\[[\d,]+\])?/g;
     const rangeRegex = /\[(\d+)-(\d+)\]/g;
     const brRegex = /BR\[([\d,]+)\]/; // To extract columns from BR token
 
-    let rowMatch;
     // Create an array to hold all row data to parse them correctly
     const rowData = {};
 
-    // First, extract all row data including ranges and blinking info
-    let tempMatch;
-    // Loop through the data to find all R and BR segments for each row
-    // We can't use rowSegmentRegex directly because it processes parts of the string
-    // independently. Instead, we need to iterate through row by row in the decoded string.
-
-    // Simpler: Split the main data string by "R" or "BR" to isolate row segments
+    // Split the main data string by "R" or "BR" to isolate row segments
     const segments = data.split(/(R\d+|BR\[[\d,]+\])/).filter(Boolean); // Filters out empty strings from split
 
     let currentRow = -1;
@@ -588,60 +580,109 @@ function toggleRainMode() {
     }
 }
 
-/**  ## Event Listeners ## */
-window.addEventListener("mouseup", () => {
-    isMouseDown = false;
-});
-
-// Prevent right-click context menu since it is used for erasing
-window.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-});
-
-// Handle keyboard shortcuts
-window.addEventListener("keydown", (e) => {
-    if (e.ctrlKey) {
-        // Invert colors
-        if (e.key.toLowerCase() === "i") {
-            e.preventDefault();
-            toggleTheme();
-        }
-        // Toggle grid orientation
-        else if (e.key.toLowerCase() === "o") {
-            e.preventDefault();
-            toggleGridOrientation();
-        }
-        // Copy share link
-        else if (e.key.toLowerCase() === "s") {
-            e.preventDefault();
-            copyShareLink();
-        }
-        // Toggle rain mode
-        else if (e.key.toLowerCase() === "r") {
-            e.preventDefault();
-            toggleRainMode();
-        }
-        // Zoom in or out
-        else if (e.key === "+" || e.key === "=" || e.key === "Add") {
-            e.preventDefault();
-            adjustZoom(0.1);
-        } else if (e.key === "-" || e.key === "Subtract") {
-            e.preventDefault();
-            adjustZoom(-0.1);
-        }
-    } else if (e.code === "Space") {
-        e.preventDefault();
-        document
-            .querySelectorAll(".grid-cell.colored, .grid-cell.blink-animation") // Clear blinking cells too
-            .forEach((cell) => {
-                cell.classList.remove("colored");
-                cell.classList.remove("blink-animation");
-            });
+/**
+ * Handles clicks on the dropdown menu.
+ * It toggles the "active" class on the dropdown menu to show or hide it.
+ * It also prevents the click from propagating to the document, which would close the menu.
+ *
+ * @param {Event} event - The click event.
+ * @param {HTMLElement} dropdownToggle - The dropdown element that was clicked.
+ */
+function handleDropdownClick(event, dropdownToggle) {
+    event.stopPropagation(); // Prevent the click from propagating to the document
+    // Toggle only if the clicked target is the dropdown toggle
+    if (event.target === dropdownToggle) {
+        toggleClass(dropdownToggle, "active");
     }
-});
+}
 
-// Load grid data from URL parameters or draw default grid
+/**  ## Event Listeners ## */
+
 window.addEventListener("load", () => {
+    // Handle dropdown menu clicks
+    document.querySelectorAll("button:has(.dropdown)").forEach((button) => {
+        button.addEventListener("click", (event) =>
+            handleDropdownClick(event, button)
+        );
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (event) => {
+        const dropdowns = document.querySelectorAll("button:has(.dropdown)");
+        dropdowns.forEach((dropdown) => {
+            if (!dropdown.contains(event.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
+    });
+
+    // Close dropdown when pressing Escape
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            const dropdowns = document.querySelectorAll(
+                "button:has(.dropdown)"
+            );
+            dropdowns.forEach((dropdown) => {
+                dropdown.classList.remove("active");
+            });
+        }
+    });
+
+    // Set mouse down state
+    window.addEventListener("mouseup", () => {
+        isMouseDown = false;
+    });
+
+    // Prevent right-click context menu since it is used for erasing
+    window.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+    });
+
+    // Handle keyboard shortcuts
+    window.addEventListener("keydown", (e) => {
+        if (e.ctrlKey) {
+            // Invert colors
+            if (e.key.toLowerCase() === "i") {
+                e.preventDefault();
+                toggleTheme();
+            }
+            // Toggle grid orientation
+            else if (e.key.toLowerCase() === "o") {
+                e.preventDefault();
+                toggleGridOrientation();
+            }
+            // Copy share link
+            else if (e.key.toLowerCase() === "s") {
+                e.preventDefault();
+                copyShareLink();
+            }
+            // Toggle rain mode
+            else if (e.key.toLowerCase() === "r") {
+                e.preventDefault();
+                toggleRainMode();
+            }
+            // Zoom in or out
+            else if (e.key === "+" || e.key === "=" || e.key === "Add") {
+                e.preventDefault();
+                adjustZoom(0.1);
+            } else if (e.key === "-" || e.key === "Subtract") {
+                e.preventDefault();
+                adjustZoom(-0.1);
+            }
+        } else if (e.code === "Space") {
+            e.preventDefault();
+            document
+                .querySelectorAll(
+                    ".grid-cell.colored, .grid-cell.blink-animation"
+                ) // Clear blinking cells too
+                .forEach((cell) => {
+                    cell.classList.remove("colored");
+                    cell.classList.remove("blink-animation");
+                });
+        }
+    });
+
+    // Load grid data from URL parameters or draw default grid
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get("data");
 
