@@ -36,6 +36,7 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 | **Mover ponto central**    | `Ctrl` + clique na célula  |
 | **Marcar célula piscando** | `Shift` + clique na célula |
 | **Compartilhar grade**     | `Ctrl` + `S`               |
+| **Adicionar Nota**         | Duplo clique na célula     |
 
 ## ⚙️ Clonar e modificar
 
