@@ -48,6 +48,7 @@ body {
 }
 
 .grid-cell {
+    position: relative;
     border: 1px solid var(--line-color);
     box-sizing: border-box;
     width: 100%;
@@ -73,6 +74,63 @@ body {
     body.grid-x & {
         border-left: 0;
         border-right: 0;
+    }
+
+    &.has-note {
+        &::after {
+            content: "";
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--button-text-color);
+            top: 1px;
+            right: 1px;
+            border-radius: 50%;
+        }
+
+        &:hover .cell-note {
+            opacity: 1;
+            pointer-events: all;
+        }
+    }
+}
+
+.cell-note {
+    position: absolute;
+    font-size: 10px;
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    border-radius: 5px;
+    border: 1px solid var(--line-color);
+    padding: 1px 3px;
+    border-radius: 3px;
+    max-width: 100px;
+    bottom: calc(100% + 3px);
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 2;
+
+    // At this moment we keep it visible at all times
+    // opacity: 0;
+    // pointer-events: none;
+
+    &::after {
+        --height: 12px;
+
+        position: absolute;
+        content: "";
+        width: 3px;
+        height: var(--height);
+        background-color: var(--button-bg-color);
+        bottom: calc(var(--height) * -1);
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    &:hover {
+        opacity: 1;
+        pointer-events: all;
     }
 }
 

@@ -177,6 +177,32 @@ function paintCell(cell, ctrlPressed, shiftPressed) {
 }
 
 /**
+ * Handles adding or removing a note from a grid cell.
+ *
+ * @param {HTMLElement} cell - The grid cell to add the note to.
+ * @param {string} note - The note text to add.
+ */
+function handleCellNote(cell, note) {
+    // Create a note element
+    const noteElement = document.createElement("div");
+    noteElement.className = "cell-note";
+    noteElement.textContent = note;
+
+    // Remove any previous note elements
+    cell.querySelector(".cell-note")?.remove();
+    cell.classList.remove("has-note");
+
+    // No note to add
+    if (!note) {
+        return;
+    }
+
+    // Append the note to the cell
+    cell.appendChild(noteElement);
+    cell.classList.add("has-note");
+}
+
+/**
  * Moves the center dot to a new cell.
  * It removes the current center dot class from any existing cell and adds it to the new cell.
  *
@@ -266,7 +292,24 @@ function getGridDataString(columns, rows) {
     if (isGridX) output += "O[X]"; // Grid X orientation
     if (isGridY) output += "O[Y]"; // Grid Y orientation
 
-    return btoa(output); // encode to base64
+    // Add notes
+    const notes = [];
+    for (let i = 0; i < cells.length; i++) {
+        const cell = cells[i];
+        const noteEl = cell.querySelector(".cell-note");
+        if (noteEl) {
+            const row = Math.floor(i / columns) + 1;
+            const col = (i % columns) + 1;
+            const note = noteEl.textContent.replace(/[\[\]\|]/g, ""); // sanitize
+            notes.push(`N[${row},${col}|${note}]`);
+        }
+    }
+
+    if (notes.length > 0) {
+        output += notes.join(""); // Append all notes
+    }
+
+    return compressGridData(output); // compressed + encoded
 }
 
 /**
@@ -277,7 +320,19 @@ function getGridDataString(columns, rows) {
  * @param {string} encodedData - The base64 encoded string representing the grid data.
  */
 function loadGridDataFromString(encodedData) {
-    const decoded = atob(encodedData);
+    let decoded;
+
+    try {
+        // Attempt to decompress the data
+        decoded = decompressGridData(encodedData);
+    } catch (error) {
+        // Fallback for old non-compressed data
+        decoded = atob(encodedData);
+    }
+
+    // If no grid data was found, bail out
+    if (!decoded) return;
+
     const grid = document.getElementById("grid");
 
     const sizeMatch = decoded.match(/^W\[(\d+)x(\d+)\]/);
@@ -409,6 +464,82 @@ function loadGridDataFromString(encodedData) {
             }
         }
     }
+
+    // Process notes
+    const noteRegex = /N\[(\d+),(\d+)\|([^\]]+)\]/g;
+    let match;
+    while ((match = noteRegex.exec(decoded)) !== null) {
+        const row = parseInt(match[1]) - 1;
+        const col = parseInt(match[2]) - 1;
+        const note = match[3];
+        const index = row * columns + col;
+        if (cells[index]) {
+            handleCellNote(cells[index], note);
+        }
+    }
+}
+
+/**
+ * Compresses the grid data string using pako.
+ *
+ * @param {string} dataString - The grid data string to compress.
+ * @returns {string} The compressed and base64-encoded string.
+ */
+function compressGridData(dataString) {
+    const compressed = pako.deflate(dataString, { level: 9 });
+    return base64UrlEncode(compressed);
+}
+
+/**
+ * Decompresses a base64-encoded string using pako.
+ *
+ * @param {string} base64Str - The base64-encoded string to decompress.
+ * @returns {string} The decompressed string.
+ */
+function decompressGridData(base64Str) {
+    const binary = base64UrlDecode(base64Str);
+    const decompressed = pako.inflate(binary, { to: "string" });
+    return decompressed;
+}
+
+/**
+ * Encodes a Uint8Array to a base64 URL-safe string.
+ *
+ * @param {Uint8Array} uint8array - The Uint8Array to encode.
+ * @returns {string} The base64 URL-safe encoded string.
+ */
+function base64UrlEncode(uint8array) {
+    let str = btoa(String.fromCharCode(...uint8array));
+    return str.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
+ * Decodes a base64 URL-safe string to a Uint8Array.
+ *
+ * @param {string} str - The base64 URL-safe encoded string to decode.
+ * @returns {Uint8Array} The decoded Uint8Array.
+ */
+function base64UrlDecode(str) {
+    str = str.replace(/-/g, "+").replace(/_/g, "/");
+    while (str.length % 4) str += "=";
+    const binaryStr = atob(str);
+    return Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+}
+
+/**
+ * Gets a grid cell element by its row and column coordinates.
+ *
+ * @param {number} row - The row index of the cell.
+ * @param {number} col - The column index of the cell.
+ * @returns {HTMLElement} The grid cell element.
+ */
+function getCellByCoords(row, col) {
+    const grid = document.getElementById("grid");
+    const columns = parseInt(
+        getComputedStyle(grid).gridTemplateColumns.split(" ").length
+    );
+    const index = row * columns + col;
+    return grid.children[index];
 }
 
 /**
@@ -628,6 +759,19 @@ window.addEventListener("load", () => {
         }
     });
 
+    // Add double click to prompt note on cells
+    document.getElementById("grid").addEventListener("dblclick", (e) => {
+        const cell = e.target.closest(".grid-cell");
+        if (!cell) return;
+
+        const existingNote = cell.querySelector(".cell-note");
+        const currentText = existingNote ? existingNote.textContent : "";
+
+        const newNote = prompt("Adicionar nota:", currentText);
+        if (newNote === null) return; // Cancelled
+        handleCellNote(cell, newNote);
+    });
+
     // Set mouse down state
     window.addEventListener("mouseup", () => {
         isMouseDown = false;
@@ -690,12 +834,15 @@ window.addEventListener("load", () => {
         loadGridDataFromString(data);
 
         // Clear the URL parameter after loading
-        urlParams.delete("data");
-        window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname
-        );
+        // Only to this if &clear=true
+        if (urlParams.get("clear") === "true") {
+            urlParams.delete("data");
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
+        }
     } else {
         drawGrid(); // default (responsive)
         window.addEventListener("resize", drawGrid);
