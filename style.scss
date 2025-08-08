@@ -116,6 +116,7 @@ body {
     pointer-events: none;
     z-index: 2;
     text-align: center;
+    word-wrap: break-word;
 
     // At this moment we keep it visible at all times
     // opacity: 0;
