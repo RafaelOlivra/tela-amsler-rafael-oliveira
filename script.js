@@ -12,6 +12,10 @@ let rainMode = false;
 let rainInterval;
 const timeoutDuration = 60000;
 
+/* ----------------------
+ * Grid Drawing
+ * ---------------------- */
+
 /**
  * Draws the grid dynamically based on the window size.
  * It creates a grid of cells that can be colored, blinked, or erased.
@@ -156,6 +160,10 @@ function drawGridFixed(columns, rows) {
     }
 }
 
+/* ----------------------
+ * Grid Interactions
+ * ---------------------- */
+
 /**
  * Paints a cell based on the current mode (coloring, blinking, erasing).
  *
@@ -216,14 +224,18 @@ function moveCenterDot(newCenterCell) {
     newCenterCell.classList.add("center-dot");
 }
 
+/* ----------------------
+ * Grid Export and Import
+ * ---------------------- */
+
 /**
  * Generates a string representation of the grid data.
  * This string includes the grid size, colored ranges, blinking cells, and any custom center dot position.
- * It also encodes the string in base64 for easier sharing.
+ * It also compress and encodes the string in base64 for easier sharing.
  *
  * @param {number} columns - The number of columns in the grid.
  * @param {number} rows - The number of rows in the grid.
- * @returns {string} - The base64 encoded string representation of the grid data.
+ * @returns {string} - The compressed string representation of the grid data.
  */
 function getGridDataString(columns, rows) {
     const grid = document.getElementById("grid");
@@ -313,13 +325,13 @@ function getGridDataString(columns, rows) {
 }
 
 /**
- * Loads grid data from a base64 encoded string.
+ * Setup the grid data from a compressed string.
  * It decodes the string, extracts grid size, theme, orientation, and cell data,
  * and then draws the grid with the specified parameters.
  *
- * @param {string} encodedData - The base64 encoded string representing the grid data.
+ * @param {string} encodedData - The compressed string representing the grid data.
  */
-function loadGridDataFromString(encodedData) {
+function setGridDataFromString(encodedData) {
     let decoded;
 
     try {
@@ -502,6 +514,10 @@ function decompressGridData(base64Str) {
     return decompressed;
 }
 
+/* ----------------------
+ * Utils
+ * ---------------------- */
+
 /**
  * Encodes a Uint8Array to a base64 URL-safe string.
  *
@@ -527,44 +543,17 @@ function base64UrlDecode(str) {
 }
 
 /**
- * Gets a grid cell element by its row and column coordinates.
- *
- * @param {number} row - The row index of the cell.
- * @param {number} col - The column index of the cell.
- * @returns {HTMLElement} The grid cell element.
+ * Toggles a class on an element.
+ * It checks if the element has the specified class and adds or removes it accordingly.
+ * @param {HTMLElement} element - The element to toggle the class on.
+ * @param {string} className - The class name to toggle.
  */
-function getCellByCoords(row, col) {
-    const grid = document.getElementById("grid");
-    const columns = parseInt(
-        getComputedStyle(grid).gridTemplateColumns.split(" ").length
-    );
-    const index = row * columns + col;
-    return grid.children[index];
-}
-
-/**
- * Copies the current grid state as a shareable link.
- * It generates a URL with the grid data encoded in base64 format.
- * If rain mode is active, it alerts the user to disable it first.
- */
-function copyShareLink() {
-    if (rainMode) {
-        alert("Disable Rain Mode to share.");
-        return;
+function toggleClass(element, className) {
+    if (element.classList.contains(className)) {
+        element.classList.remove(className);
+    } else {
+        element.classList.add(className);
     }
-
-    const grid = document.getElementById("grid");
-    const columns = parseInt(
-        getComputedStyle(grid).gridTemplateColumns.split(" ").length
-    );
-    const rows = parseInt(
-        getComputedStyle(grid).gridTemplateRows.split(" ").length
-    );
-    const dataStr = getGridDataString(columns, rows);
-    const url = new URL(window.location.href);
-    url.searchParams.set("data", dataStr);
-    navigator.clipboard.writeText(url.toString());
-    alert("Link copiado!");
 }
 
 /**
@@ -610,6 +599,21 @@ function startRain() {
     }, 300);
 }
 
+/* ----------------------
+ * Controls
+ * ---------------------- */
+
+/**
+ * Adjusts the zoom level of the grid.
+ * It scales the grid wrapper element based on the zoom level.
+ * The zoom level is clamped between 0.1 and 3.
+ * @param {number} delta - The amount to adjust the zoom level by.
+ */
+function adjustZoom(delta) {
+    zoomLevel = Math.max(0.1, Math.min(3, zoomLevel + delta));
+    wrapper.style.transform = `scale(${zoomLevel})`;
+}
+
 /**
  * Toggles the dark theme for the grid.
  * It adds or removes the "dark" class from the body element.
@@ -617,20 +621,6 @@ function startRain() {
  */
 function toggleTheme() {
     document.body.classList.toggle("dark");
-}
-
-/**
- * Toggles a class on an element.
- * It checks if the element has the specified class and adds or removes it accordingly.
- * @param {HTMLElement} element - The element to toggle the class on.
- * @param {string} className - The class name to toggle.
- */
-function toggleClass(element, className) {
-    if (element.classList.contains(className)) {
-        element.classList.remove(className);
-    } else {
-        element.classList.add(className);
-    }
 }
 
 /**
@@ -647,45 +637,6 @@ function toggleGridOrientation() {
     } else {
         document.body.classList.add("grid-x");
     }
-}
-
-/**
- * Adjusts the zoom level of the grid.
- * It scales the grid wrapper element based on the zoom level.
- * The zoom level is clamped between 0.1 and 3.
- * @param {number} delta - The amount to adjust the zoom level by.
- */
-function adjustZoom(delta) {
-    zoomLevel = Math.max(0.1, Math.min(3, zoomLevel + delta));
-    wrapper.style.transform = `scale(${zoomLevel})`;
-}
-
-/**
- * Toggles fullscreen mode for the document.
- * It checks if the document is currently in fullscreen mode and requests or exits fullscreen accordingly.
- */
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
-}
-
-/**
- * Shows the controls for a brief period when the mouse moves.
- * It removes the "hidden" class from the controls element and sets a timeout to hide it
- * after 3 seconds of inactivity.
- */
-function showControls() {
-    let hideTimeout = null;
-    controls.classList.remove("hidden");
-    clearTimeout(hideTimeout);
-    hideTimeout = setTimeout(() => {
-        controls.classList.add("hidden");
-    }, timeoutDuration);
 }
 
 /**
@@ -712,6 +663,45 @@ function toggleRainMode() {
 }
 
 /**
+ * Toggles fullscreen mode for the document.
+ * It checks if the document is currently in fullscreen mode and requests or exits fullscreen accordingly.
+ */
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+/**
+ * Copies the current grid state as a shareable link.
+ * It generates a URL with the grid data encoded in base64 format.
+ * If rain mode is active, it alerts the user to disable it first.
+ */
+function copyShareLink() {
+    if (rainMode) {
+        alert("Disable Rain Mode to share.");
+        return;
+    }
+
+    const grid = document.getElementById("grid");
+    const columns = parseInt(
+        getComputedStyle(grid).gridTemplateColumns.split(" ").length
+    );
+    const rows = parseInt(
+        getComputedStyle(grid).gridTemplateRows.split(" ").length
+    );
+    const dataStr = getGridDataString(columns, rows);
+    const url = new URL(window.location.href);
+    url.searchParams.set("data", dataStr);
+    navigator.clipboard.writeText(url.toString());
+    alert("Link copiado!");
+}
+
+/**
  * Handles clicks on the dropdown menu.
  * It toggles the "active" class on the dropdown menu to show or hide it.
  * It also prevents the click from propagating to the document, which would close the menu.
@@ -727,7 +717,9 @@ function handleDropdownClick(event, dropdownToggle) {
     }
 }
 
-/**  ## Event Listeners ## */
+/* ----------------------
+ * Event Listeners
+ * ---------------------- */
 
 window.addEventListener("load", () => {
     // Handle dropdown menu clicks
@@ -831,7 +823,7 @@ window.addEventListener("load", () => {
     const data = urlParams.get("data");
 
     if (data) {
-        loadGridDataFromString(data);
+        setGridDataFromString(data);
 
         // Clear the URL parameter after loading
         // Only to this if &clear=true

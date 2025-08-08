@@ -82,10 +82,15 @@ body {
             position: absolute;
             width: 3px;
             height: 3px;
-            background: var(--button-text-color);
+            background: var(--line-color);
             top: 1px;
             right: 1px;
             border-radius: 50%;
+        }
+
+        &.colored::after,
+        &:hover::after {
+            background: var(--button-text-color);
         }
 
         &:hover .cell-note {
@@ -104,12 +109,13 @@ body {
     border: 1px solid var(--line-color);
     padding: 1px 3px;
     border-radius: 3px;
-    max-width: 100px;
+    width: clamp(40px, 50px, 300px);
     bottom: calc(100% + 3px);
     left: 50%;
     transform: translateX(-50%);
     pointer-events: none;
     z-index: 2;
+    text-align: center;
 
     // At this moment we keep it visible at all times
     // opacity: 0;
