@@ -254,11 +254,13 @@ button {
     text-align: left;
     display: block;
     overflow: hidden;
+    overflow-y: auto;
     opacity: 0;
     visibility: hidden;
     transform: translateY(15px);
     transition: all 0.3s ease;
     box-shadow: var(--box-shadow);
+    max-height: calc(100vh - 80px);
 
     li {
       margin-top: -1px;

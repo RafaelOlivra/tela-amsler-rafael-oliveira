@@ -151,6 +151,29 @@ function drawGridFixed(columns, rows) {
   }
 }
 
+/**
+ * Resets the grid to its initial state.
+ */
+function resetGrid() {
+  // Prompt the user for confirmation
+  if (!confirm("Tem certeza de que deseja resetar a grade?")) {
+    return;
+  }
+
+  // Remove all body attributes related to the grid
+  document.body.removeAttribute("data-cell-color");
+  document.body.removeAttribute("data-line-color");
+  document.body.removeAttribute("style");
+  document.body.classList.remove("dark");
+  wrapper.removeAttribute("style");
+
+  // Remove all grid cells
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  drawGrid();
+}
+
 /* ----------------------
  * Grid Colors
  * ---------------------- */
@@ -847,6 +870,11 @@ window.addEventListener("load", () => {
       } else if (e.key === "-" || e.key === "Subtract") {
         e.preventDefault();
         adjustZoom(-0.1);
+      }
+      // Reset grid
+      else if (e.key.toLowerCase() === "backspace") {
+        e.preventDefault();
+        resetGrid();
       }
     } else if (e.code === "Space") {
       e.preventDefault();
