@@ -38,6 +38,8 @@ body.dark {
 
   --button-bg-color: rgba(255, 255, 255, 0.9);
   --button-text-color: black;
+
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 html,
@@ -208,6 +210,7 @@ button {
   transition: background-color 0.3s;
   zoom: 1;
   line-height: 1;
+  box-shadow: var(--box-shadow);
 
   &:hover {
     background-color: color-mix(in srgb, var(--button-bg-color), var(--line-color) 5%);
@@ -255,6 +258,7 @@ button {
     visibility: hidden;
     transform: translateY(15px);
     transition: all 0.3s ease;
+    box-shadow: var(--box-shadow);
 
     li {
       margin-top: -1px;

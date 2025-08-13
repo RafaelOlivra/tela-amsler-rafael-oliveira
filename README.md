@@ -6,14 +6,15 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 
 ## ✨ Funcionalidades
 
--   ✅ **Grade responsiva** para marcação de distorções visuais
--   ✅ **Modo claro/escuro** com um clique (ou atalho `Ctrl + I`)
--   ✅ **Zoom in/out** com botões ou atalhos (`Ctrl + + / -`)
--   ✅ **Botão para apagar** toda a marcação (tecla `Espaço`)
--   ✅ **Modo Chuva (Rain Mode)**: Linhas verticais com 4 blocos de altura descem aleatoriamente, simulando estímulos visuais para diagnóstico funcional de áreas de perda de percepção (`Ctrl + R`)
--   ✅ **Compartilhamento**: Gera uma URL com os quadrados preenchidos codificados para compartilhamento, **incluindo agora as células piscando e a posição personalizada do ponto central**.
--   ✅ **Ponto central personalizável**: Mova o ponto central para qualquer quadrado da grade segurando `Shift` e clicando na nova posição.
--   ✅ **Células piscando**: Marque células individuais para piscar segurando `Ctrl` e clicando nelas.
+- ✅ **Grade responsiva** para marcação de distorções visuais
+- ✅ **Modo claro/escuro** com um clique (ou atalho `Ctrl + I`)
+- ✅ **Zoom in/out** com botões ou atalhos (`Ctrl + + / -`)
+- ✅ **Botão para apagar** toda a marcação (tecla `Espaço`)
+- ✅ **Modo Chuva (Rain Mode)**: Linhas verticais com 4 blocos de altura descem aleatoriamente, simulando estímulos visuais para diagnóstico funcional de áreas de perda de percepção (`Ctrl + R`)
+- ✅ **Compartilhamento**: Gera uma URL com os quadrados preenchidos codificados para compartilhamento, **incluindo agora as células piscando e a posição personalizada do ponto central**.
+- ✅ **Ponto central personalizável**: Mova o ponto central para qualquer quadrado da grade segurando `Shift` e clicando na nova posição.
+- ✅ **Células piscando**: Marque células individuais para piscar segurando `Ctrl` e clicando nelas.
+- ✅ **Cores customizáveis**: Selecione as cores de fundo e grade utilizando os presets no menu
 
 ## 🌐 Acesso
 
