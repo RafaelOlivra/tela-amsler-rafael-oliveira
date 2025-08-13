@@ -5,17 +5,17 @@
  */
 
 :root {
-  --bg-color: #ffffff;
+  --bg-color: white;
 
-  --dot-color: #000000;
+  --dot-color: black;
 
-  --line-color: #000000;
-  --line-color-initial: #000000;
-  --line-color-inverse: #ffffff;
+  --line-color: black;
+  --line-color-initial: black;
+  --line-color-inverse: white;
 
-  --cell-color: #ffffff;
-  --cell-color-initial: #ffffff;
-  --cell-color-inverse: #000000;
+  --cell-color: white;
+  --cell-color-initial: white;
+  --cell-color-inverse: black;
   --cell-highlight-color: rgb(194, 13, 13);
 
   --button-bg-color: rgba(0, 0, 0, 0.8);
@@ -23,18 +23,18 @@
 }
 
 body.dark {
-  --bg-color: #000000;
+  --bg-color: black;
 
-  --dot-color: #ffffff;
+  --dot-color: white;
 
-  --line-color: #ffffff;
-  --line-color-initial: #ffffff;
-  --line-color-inverse: #000000;
+  --line-color: white;
+  --line-color-initial: white;
+  --line-color-inverse: black;
 
-  --cell-color: #000000;
-  --cell-color-initial: #000000;
-  --cell-color-inverse: #ffffff;
-  --cell-highlight-color: #ffffff;
+  --cell-color: black;
+  --cell-color-initial: black;
+  --cell-color-inverse: white;
+  --cell-highlight-color: white;
 
   --button-bg-color: rgba(255, 255, 255, 0.9);
   --button-text-color: black;
@@ -138,10 +138,6 @@ body {
   z-index: 2;
   text-align: center;
   word-wrap: break-word;
-
-  // At this moment we keep it visible at all times
-  // opacity: 0;
-  // pointer-events: none;
 
   &::after {
     --height: 12px;
@@ -363,10 +359,18 @@ button {
 
 @media print {
   body.dark {
-    --bg-color: #ffffff;
-    --line-color: #000000;
-    --dot-color: #000000;
-    --cell-highlight-color: #fff;
+    --bg-color: white;
+
+    --dot-color: black;
+
+    --line-color: black;
+    --line-color-inverse: white;
+
+    --cell-color: white;
+    --cell-color-inverse: ;
+    --cell-highlight-color: black;
+
+    --button-text-color: white;
   }
 
   #controls {
