@@ -161,6 +161,40 @@ function drawGridFixed(columns, rows) {
 }
 
 /* ----------------------
+ * Grid Colors
+ * ---------------------- */
+
+/**
+ * Applies a custom cell color to the grid.
+ *
+ * @param {string} color - The cell color to apply (e.g., "red").
+ */
+function applyCellColor(color) {
+    if (color) {
+        document.body.style.setProperty("--cell-color", color);
+        document.body.dataset.cellColor = color;
+    } else {
+        document.body.style.removeProperty("--cell-color");
+        delete document.body.dataset.cellColor;
+    }
+}
+
+/**
+ * Applies a custom line color to the grid.
+ *
+ * @param {string} color - The line color to apply (e.g., "red").
+ */
+function applyLineColor(color) {
+    if (color) {
+        document.body.style.setProperty("--line-color", color);
+        document.body.dataset.lineColor = color;
+    } else {
+        document.body.style.removeProperty("--line-color");
+        delete document.body.dataset.lineColor;
+    }
+}
+
+/* ----------------------
  * Grid Interactions
  * ---------------------- */
 
@@ -304,6 +338,13 @@ function getGridDataString(columns, rows) {
     if (isGridX) output += "O[X]"; // Grid X orientation
     if (isGridY) output += "O[Y]"; // Grid Y orientation
 
+    // Add custom colors
+    const lineColor = document.body.dataset.lineColor || "";
+    const cellColor = document.body.dataset.cellColor || "";
+    if (lineColor || cellColor) {
+        output += `CC[${lineColor}|${cellColor}]`;
+    }
+
     // Add notes
     const notes = [];
     for (let i = 0; i < cells.length; i++) {
@@ -363,6 +404,16 @@ function setGridDataFromString(encodedData) {
     if (themeMatch && themeMatch[1] === "D") {
         document.body.classList.add("dark");
         data = data.replace(themeMatch[0], ""); // Remove theme info from data
+    }
+
+    // Check for custom colors
+    const customColorMatch = data.match(/CC\[(.*?)\]/);
+    console.log(customColorMatch);
+    if (customColorMatch) {
+        const [lineColor, cellColor] = customColorMatch[1].split("|");
+        applyCellColor(cellColor);
+        applyLineColor(lineColor);
+        data = data.replace(customColorMatch[0], ""); // Remove custom color info from data
     }
 
     // Check for grid orientation and apply

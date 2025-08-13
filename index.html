@@ -1,142 +1,160 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>Tela de Amsler Responsiva | Rafael Oliveira</title>
-        <meta
-            name="description"
-            content="Tela de Amsler — Ferramenta de triagem visual em tela cheia para detectar distorções visuais como as causadas pela degeneração macular."
-        />
+    <title>Tela de Amsler Responsiva | Rafael Oliveira</title>
+    <meta
+      name="description"
+      content="Tela de Amsler — Ferramenta de triagem visual em tela cheia para detectar distorções visuais como as causadas pela degeneração macular."
+    />
 
-        <link
-            rel="shortcut icon"
-            href="https://rafaeloliveiradesign.com/wp-content/themes/rafaeloliveiradesign/favicon.png"
-        />
+    <link
+      rel="shortcut icon"
+      href="https://rafaeloliveiradesign.com/wp-content/themes/rafaeloliveiradesign/favicon.png"
+    />
 
-        <link rel="stylesheet" href="./dist/style.css?cache-buster=9" />
-        <script src="./dist/script.min.js?cache-buster=9"></script>
-        <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <link rel="stylesheet" href="./dist/style.css?cache-buster=9" />
+    <script src="./dist/script.min.js?cache-buster=9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
-        <script
-            async
-            src="https://www.googletagmanager.com/gtag/js?id=G-75M78F17BD"
-        ></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-            gtag("js", new Date());
-            gtag("config", "G-75M78F17BD");
-        </script>
-    </head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-75M78F17BD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-75M78F17BD");
+    </script>
+  </head>
 
-    <body>
-        <div id="controls">
-            <button class="menu-button" title="Menu">
-                ☰<span class="label">Menu</span>
+  <body>
+    <div id="controls">
+      <button class="menu-button" title="Menu">
+        ☰
+        <span class="label">Menu</span>
 
-                <ul class="dropdown">
-                    <li>
-                        <a
-                            href="#"
-                            onclick="adjustZoom(0.1)"
-                            title="Aumentar zoom (Ctrl + +)"
-                        >
-                            <i>➕</i> Aumentar zoom
-                            <span>(Ctrl + +)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            onclick="adjustZoom(-0.1)"
-                            title="Diminuir zoom (Ctrl + -)"
-                        >
-                            <i>➖</i> Diminuir zoom
-                            <span>(Ctrl + -)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            onclick="toggleTheme()"
-                            title="Inverter cores (Ctrl + I)"
-                        >
-                            <i>🌗</i> Inverter cores
-                            <span>(Ctrl + I)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            onclick="toggleGridOrientation()"
-                            title="Mudar orientação da grade (Ctrl + O)"
-                        >
-                            <i>🔄</i> Mudar Grade
-                            <span>(Ctrl + O)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            onclick="toggleRainMode()"
-                            title="Ativar/Desativar Modo Chuva (Ctrl + R)"
-                            class="rain-toggle"
-                        >
-                            <i>🌧️</i> Modo Chuva
-                            <span>(Ctrl + R)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            onclick="toggleFullscreen()"
-                            title="Alternar tela cheia (F11)"
-                        >
-                            <i>↕️</i> Tela Cheia
-                            <span>(F11)</span>
-                        </a>
-                    </li>
+        <ul class="dropdown">
+          <li>
+            <a href="#" onclick="adjustZoom(0.1)" title="Aumentar zoom (Ctrl + +)">
+              <i>➕</i>
+              Aumentar zoom
+              <span>(Ctrl + +)</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="adjustZoom(-0.1)" title="Diminuir zoom (Ctrl + -)">
+              <i>➖</i>
+              Diminuir zoom
+              <span>(Ctrl + -)</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="toggleTheme()" title="Modo Escuro (Ctrl + I)">
+              <i>🌗</i>
+              Modo Escuro
+              <span>(Ctrl + I)</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="toggleGridOrientation()" title="Mudar orientação da grade (Ctrl + O)">
+              <i>🔄</i>
+              Mudar Grade
+              <span>(Ctrl + O)</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="toggleRainMode()" title="Ativar/Desativar Modo Chuva (Ctrl + R)" class="rain-toggle">
+              <i>🌧️</i>
+              Modo Chuva
+              <span>(Ctrl + R)</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" onclick="toggleFullscreen()" title="Alternar tela cheia (F11)">
+              <i>↕️</i>
+              Tela Cheia
+              <span>(F11)</span>
+            </a>
+          </li>
 
-                    <li>
-                        <a
-                            href="#"
-                            onclick="copyShareLink()"
-                            title="Compartilhar grade (Ctrl + S)"
-                        >
-                            <i>🔗</i> Compartilhar
-                            <span>(Ctrl + S)</span>
-                        </a>
-                    </li>
-                    <li class="spaced">
-                        <a
-                            href="https://github.com/RafaelOlivra/tela-amsler-rafael-oliveira"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="GitHub — Código Fonte"
-                        >
-                            <i>📝</i> Código Fonte (GitHub)
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="https://rafaeloliveiradesign.com/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Rafael Oliveira Design — Portfólio e Serviços"
-                        >
-                            <i>👩‍💻</i> Made by RO
-                        </a>
-                    </li>
-                </ul>
-            </button>
-        </div>
+          <li>
+            <a href="#" onclick="copyShareLink()" title="Compartilhar grade (Ctrl + S)">
+              <i>🔗</i>
+              Compartilhar
+              <span>(Ctrl + S)</span>
+            </a>
+          </li>
+          <li class="spaced">
+            <div href="#" title="">
+              <i>🖌️</i>
+              Cor do fundo:
+              <div class="color-row">
+                <span
+                  class="color-box reset"
+                  style="background-color: var(--cell-color-initial)"
+                  onclick="applyCellColor()"
+                ></span>
+                <span
+                  class="color-box"
+                  style="background-color: var(--cell-color-inverse)"
+                  onclick="applyCellColor('var(--cell-color-inverse)')"
+                ></span>
+                <span class="color-box" style="background-color: blue" onclick="applyCellColor('blue')"></span>
+                <span class="color-box" style="background-color: red" onclick="applyCellColor('red')"></span>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div href="#" title="">
+              <i>🖌️</i>
+              Cor da grade:
+              <div class="color-row">
+                <span
+                  class="color-box reset"
+                  style="background-color: var(--line-color-initial)"
+                  onclick="applyLineColor()"
+                ></span>
+                <span
+                  class="color-box"
+                  style="background-color: var(--line-color-inverse)"
+                  onclick="applyLineColor('var(--line-color-inverse)')"
+                ></span>
+                <span class="color-box" style="background-color: blue" onclick="applyLineColor('blue')"></span>
+                <span class="color-box" style="background-color: red" onclick="applyLineColor('red')"></span>
+              </div>
+            </div>
+          </li>
+          <li class="spaced">
+            <a
+              href="https://github.com/RafaelOlivra/tela-amsler-rafael-oliveira"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="GitHub — Código Fonte"
+            >
+              <i>📝</i>
+              Código Fonte (GitHub)
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://rafaeloliveiradesign.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Rafael Oliveira Design — Portfólio e Serviços"
+            >
+              <i>👩‍💻</i>
+              Made by RO
+            </a>
+          </li>
+        </ul>
+      </button>
+    </div>
 
-        <div class="grid-wrapper" id="wrapper">
-            <div class="grid-container" id="grid"></div>
-        </div>
-    </body>
+    <div class="grid-wrapper" id="wrapper">
+      <div class="grid-container" id="grid"></div>
+    </div>
+  </body>
 </html>
