@@ -30,7 +30,7 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 | :------------------------- | :------------------------- |
 | Aumentar zoom              | `Ctrl` + `+`               |
 | Diminuir zoom              | `Ctrl` + `-`               |
-| Inverter cores             | `Ctrl` + `I`               |
+| Alternar Tema             | `Ctrl` + `I`               |
 | Limpar marcações           | `Espaço`                   |
 | Ativar/Desativar chuva     | `Ctrl` + `R`               |
 | Tela Cheia                 | `F11`                      |
