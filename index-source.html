@@ -1,81 +1,67 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="{{LANGUAGE_CODE}}}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Tela de Amsler Responsiva | Rafael Oliveira</title>
-    <meta
-      name="description"
-      content="Tela de Amsler — Ferramenta de triagem visual em tela cheia para detectar distorções visuais como as causadas pela degeneração macular."
-    />
+    <title>{{TITLE}}</title>
+    <meta name="description" content="{{DESCRIPTION}}" />
 
-    <link
-      rel="shortcut icon"
-      href="https://rafaeloliveiradesign.com/wp-content/themes/rafaeloliveiradesign/favicon.png"
-    />
+    <link rel="shortcut icon" href="{{FAVICON_URL}}" />
 
-    <link rel="stylesheet" href="./dist/style.css?cache-buster=18" />
-    <script src="./dist/script.min.js?cache-buster=18"></script>
+    <link rel="stylesheet" href="./dist/style.css?cache-buster={{BUILD_HASH}}" />
+    <script src="./dist/script.min.js?cache-buster={{BUILD_HASH}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-75M78F17BD"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-75M78F17BD");
-    </script>
+    {{HEAD_SCRIPTS}}
   </head>
 
   <body>
     <div id="controls">
       <button class="menu-button" title="Menu">
         ☰
-        <span class="label">Menu</span>
+        <span class="label">__('Menu')</span>
 
         <ul class="dropdown">
           <li>
             <a href="#" onclick="adjustZoom(0.1)" title="Aumentar zoom (Ctrl + +)">
               <i>➕</i>
-              Aumentar zoom
+              __('Aumentar zoom')
               <span>(Ctrl + +)</span>
             </a>
           </li>
           <li>
             <a href="#" onclick="adjustZoom(-0.1)" title="Diminuir zoom (Ctrl + -)">
               <i>➖</i>
-              Diminuir zoom
+              __('Diminuir zoom')
               <span>(Ctrl + -)</span>
             </a>
           </li>
           <li>
             <a href="#" onclick="toggleTheme()" title="Alternar Tema (Ctrl + I)">
               <i>🌗</i>
-              Alternar Tema
+              __('Alternar Tema')
               <span>(Ctrl + I)</span>
             </a>
           </li>
           <li>
             <a href="#" onclick="toggleGridOrientation()" title="Mudar orientação da grade (Ctrl + O)">
               <i>🔄</i>
-              Mudar Grade
+              __('Mudar Grade')
               <span>(Ctrl + O)</span>
             </a>
           </li>
           <li>
             <a href="#" onclick="toggleRainMode()" title="Ativar/Desativar Modo Chuva (Ctrl + R)" class="rain-toggle">
               <i>🌧️</i>
-              Modo Chuva
+              __('Modo Chuva')
               <span>(Ctrl + R)</span>
             </a>
           </li>
           <li>
             <a href="#" onclick="toggleFullscreen()" title="Alternar tela cheia (F11)">
               <i>↕️</i>
-              Tela Cheia
+              __('Tela Cheia')
               <span>(F11)</span>
             </a>
           </li>
@@ -83,21 +69,21 @@
           <li>
             <a href="#" onclick="copyShareLink()" title="Compartilhar grade (Ctrl + S)">
               <i>🔗</i>
-              Compartilhar
+              __('Compartilhar')
               <span>(Ctrl + S)</span>
             </a>
           </li>
           <li>
             <a href="#" onclick="resetGrid()" title="Resetar grade (Ctrl + Backspace)">
               <i>🗑️</i>
-              Resetar
+              __('Resetar')
               <span>(Ctrl + Backspace)</span>
             </a>
           </li>
           <li class="spaced">
             <div href="#" title="">
               <i>🖌️</i>
-              Cor do fundo:
+              __('Cor do fundo:')
               <div class="color-row">
                 <span
                   class="color-box reset"
@@ -117,7 +103,7 @@
           <li>
             <div href="#" title="">
               <i>🖌️</i>
-              Cor da grade:
+              __('Cor da grade:')
               <div class="color-row">
                 <span
                   class="color-box reset"
@@ -134,28 +120,7 @@
               </div>
             </div>
           </li>
-          <li class="spaced">
-            <a
-              href="https://github.com/RafaelOlivra/tela-amsler-rafael-oliveira"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="GitHub — Código Fonte"
-            >
-              <i>📝</i>
-              Código Fonte (GitHub)
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://rafaeloliveiradesign.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Rafael Oliveira Design — Portfólio e Serviços"
-            >
-              <i>👩‍💻</i>
-              Made by RO
-            </a>
-          </li>
+          {{MENU_EXTRA_ITEMS}}
         </ul>
       </button>
     </div>
