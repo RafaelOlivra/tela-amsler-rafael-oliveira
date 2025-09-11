@@ -57,13 +57,7 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 2.  Abra o arquivo HTML diretamente no navegador:
 
     ```
-    index.html
-    ```
-
-3.  (Opcional) Suba num servidor local com VS Code Live Server ou Python:
-
-    ```bash
-    python -m http.server
+    ./dist/index.html
     ```
 
 ## ⚙️ Build System com `.env`

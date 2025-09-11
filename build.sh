@@ -1,6 +1,13 @@
 #!/bin/bash
 
 WATCH_MODE=false
+INDEX_SRC="src/index-template.html"
+INDEX_OUT="dist/index.html"
+STYLE_SRC="src/style.scss"
+STYLE_OUT="dist/assets/style.css"
+SCRIPT_SRC="src/script.js"
+SCRIPT_OUT="dist/assets/script.min.js"
+FAVICON_FILE="src/favicon.ico"
 
 if [ "$1" == "--watch" ]; then
     WATCH_MODE=true
@@ -24,10 +31,12 @@ generate_build_hash() {
 build_index() {
     local BUILD_HASH=$(generate_build_hash)
 
-    INDEX_SRC="index-source.html"
-    INDEX_OUT="index.html"
-
     cp "$INDEX_SRC" "$INDEX_OUT"
+
+    # Create build directory if not exists
+    if [ ! -d "dist/assets" ]; then
+        mkdir -p "dist/assets"
+    fi
 
     #--------------------------------------
     # Replace placeholders
@@ -73,7 +82,7 @@ build_index() {
 
     #--------------------------------------
     # Apply translations
-    
+
     while IFS= read -r line; do
         [[ -z "$line" ]] && continue
         ORIG=$(echo "$line" | cut -d"|" -f1)
@@ -88,16 +97,24 @@ build_index() {
     #--------------------------------------
 
     # Minify HTML
-    npx html-minifier-terser index.html \
+    npx html-minifier-terser "$INDEX_OUT" \
         --collapse-whitespace \
         --remove-comments \
         --remove-optional-tags \
         --minify-css true \
         --minify-js true \
-        -o index.html
+        -o "$INDEX_OUT"
 
-    echo "index.html atualizado ✨"
+    echo "$INDEX_OUT atualizado ✨"
 }
+
+# Delete previous dist contents
+rm -rf dist/*
+
+# Copy favicon if exists
+if [ -f "$FAVICON_FILE" ]; then
+    cp "$FAVICON_FILE" dist/
+fi
 
 # Compile assets
 if [ "$WATCH_MODE" = true ]; then
@@ -107,13 +124,13 @@ if [ "$WATCH_MODE" = true ]; then
     build_index
 
     # Watch SCSS
-    npx sass --watch style.scss:dist/style.css --style=compressed &
+    npx sass --watch "$STYLE_SRC":"$STYLE_OUT" --style=compressed &
 
     # Watch JS
-    npx esbuild script.js --outfile=dist/script.min.js --minify --watch &
+    npx esbuild "$SCRIPT_SRC" --outfile="$SCRIPT_OUT" --minify --watch &
 
     # Watch index-source.html and .env
-    while inotifywait -e close_write index-source.html .env; do
+    while inotifywait -e close_write "$INDEX_SRC" .env; do
         # Reload env vars because .env may have changed
         set -a
         source .env
@@ -122,8 +139,8 @@ if [ "$WATCH_MODE" = true ]; then
     done
 
 else
-    npx sass style.scss dist/style.css --style=compressed
-    npx esbuild script.js --outfile=dist/script.min.js --minify
+    npx sass "$STYLE_SRC" "$STYLE_OUT" --style=compressed
+    npx esbuild "$SCRIPT_SRC" --outfile="$SCRIPT_OUT" --minify
     build_index
     echo "Build completo ✅"
 fi
