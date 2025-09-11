@@ -73,6 +73,7 @@ build_index() {
 
     #--------------------------------------
     # Apply translations
+    
     while IFS= read -r line; do
         [[ -z "$line" ]] && continue
         ORIG=$(echo "$line" | cut -d"|" -f1)
