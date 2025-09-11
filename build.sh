@@ -86,6 +86,15 @@ build_index() {
     done <<< "$(echo "$TRANSLATION_MAP")"
     #--------------------------------------
 
+    # Minify HTML
+    npx html-minifier-terser index.html \
+        --collapse-whitespace \
+        --remove-comments \
+        --remove-optional-tags \
+        --minify-css true \
+        --minify-js true \
+        -o index.html
+
     echo "index.html atualizado ✨"
 }
 
