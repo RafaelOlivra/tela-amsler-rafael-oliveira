@@ -1,20 +1,27 @@
 #!/bin/bash
 
 WATCH_MODE=false
-INDEX_SRC="src/index-template.html"
-INDEX_OUT="dist/index.html"
-STYLE_SRC="src/style.scss"
-STYLE_OUT="dist/assets/style.css"
-SCRIPT_SRC="src/script.js"
-SCRIPT_OUT="dist/assets/script.min.js"
-FAVICON_FILE="src/favicon.ico"
+
+SRC_DIR="src"
+BUILD_DIR="dist"
+ASSETS_DIR="$BUILD_DIR/assets"
+
+INDEX_SRC="$SRC_DIR/index-template.html"
+INDEX_OUT="$BUILD_DIR/index.html"
+STYLE_SRC="$SRC_DIR/style.scss"
+STYLE_OUT="$ASSETS_DIR/style.css"
+SCRIPT_SRC="$SRC_DIR/script.js"
+SCRIPT_OUT="$ASSETS_DIR/script.min.js"
+
+FAVICON_FILE="$SRC_DIR/favicon.ico"
+SOCIAL_IMAGE_FILE="$SRC_DIR/screenshot.png"
 
 if [ "$1" == "--watch" ]; then
     WATCH_MODE=true
 fi
 
-if [ ! -d "dist" ]; then
-    mkdir dist
+if [ ! -d "$BUILD_DIR" ]; then
+    mkdir "$BUILD_DIR"
 fi
 
 # Load .env variables
@@ -33,9 +40,22 @@ build_index() {
 
     cp "$INDEX_SRC" "$INDEX_OUT"
 
-    # Create build directory if not exists
-    if [ ! -d "dist/assets" ]; then
-        mkdir -p "dist/assets"
+    # Create assets directory if not exists
+    if [ ! -d "$ASSETS_DIR" ]; then
+        mkdir -p "$ASSETS_DIR"
+    fi
+
+    #--------------------------------------
+    # Copy assets
+
+    # Copy favicon if exists
+    if [ -f "$FAVICON_FILE" ]; then
+        cp "$FAVICON_FILE" "$BUILD_DIR/"
+    fi
+
+    # Copy social image if exists
+    if [ -f "$SOCIAL_IMAGE_FILE" ]; then
+        cp "$SOCIAL_IMAGE_FILE" "$ASSETS_DIR/"
     fi
 
     #--------------------------------------
@@ -50,6 +70,7 @@ build_index() {
     DESCRIPTION_ESC=$(escape_awk "$DESCRIPTION")
     LANGUAGE_CODE_ESC=$(escape_awk "$LANGUAGE_CODE")
     FAVICON_URL_ESC=$(escape_awk "$FAVICON_URL")
+    SOCIAL_IMAGE_URL_ESC=$(escape_awk "$SOCIAL_IMAGE_URL")
     BUILD_HASH_ESC=$(escape_awk "$BUILD_HASH")
 
     # Use awk to safely replace placeholders (works with multiline)
@@ -57,11 +78,13 @@ build_index() {
         -v desc="$DESCRIPTION_ESC" \
         -v lang="$LANGUAGE_CODE_ESC" \
         -v favicon="$FAVICON_URL_ESC" \
+        -v social_image="$SOCIAL_IMAGE_URL_ESC" \
         -v hash="$BUILD_HASH_ESC" \
         '{ gsub(/{{TITLE}}/, title);
            gsub(/{{DESCRIPTION}}/, desc);
            gsub(/{{LANGUAGE_CODE}}/, lang);
            gsub(/{{FAVICON_URL}}/, favicon);
+           gsub(/{{SOCIAL_IMAGE_URL}}/, social_image);
            gsub(/{{BUILD_HASH}}/, hash);
            print }' "$INDEX_OUT" > "$INDEX_OUT.tmp" && mv "$INDEX_OUT.tmp" "$INDEX_OUT"
 
@@ -110,11 +133,6 @@ build_index() {
 
 # Delete previous dist contents
 rm -rf dist/*
-
-# Copy favicon if exists
-if [ -f "$FAVICON_FILE" ]; then
-    cp "$FAVICON_FILE" dist/
-fi
 
 # Compile assets
 if [ "$WATCH_MODE" = true ]; then
