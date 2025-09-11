@@ -12,7 +12,7 @@ fi
 
 # Load .env variables
 set -a
-source .env
+source <(sed 's/\r$//' .env)
 set +a
 
 # Function to generate build hash
@@ -29,14 +29,32 @@ build_index() {
 
     cp "$INDEX_SRC" "$INDEX_OUT"
 
+    #--------------------------------------
     # Replace placeholders
-    sed -i \
-        -e "s|{{TITLE}}|$TITLE|g" \
-        -e "s|{{DESCRIPTION}}|$DESCRIPTION|g" \
-        -e "s|{{LANGUAGE_CODE}}|$LANGUAGE_CODE|g" \
-        -e "s|{{FAVICON_URL}}|$FAVICON_URL|g" \
-        -e "s|{{BUILD_HASH}}|$BUILD_HASH|g" \
-        "$INDEX_OUT"
+    
+    # Escape values for awk
+    escape_awk() {
+        echo "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+    }
+
+    TITLE_ESC=$(escape_awk "$TITLE")
+    DESCRIPTION_ESC=$(escape_awk "$DESCRIPTION")
+    LANGUAGE_CODE_ESC=$(escape_awk "$LANGUAGE_CODE")
+    FAVICON_URL_ESC=$(escape_awk "$FAVICON_URL")
+    BUILD_HASH_ESC=$(escape_awk "$BUILD_HASH")
+
+    # Use awk to safely replace placeholders (works with multiline)
+    awk -v title="$TITLE_ESC" \
+        -v desc="$DESCRIPTION_ESC" \
+        -v lang="$LANGUAGE_CODE_ESC" \
+        -v favicon="$FAVICON_URL_ESC" \
+        -v hash="$BUILD_HASH_ESC" \
+        '{ gsub(/{{TITLE}}/, title);
+           gsub(/{{DESCRIPTION}}/, desc);
+           gsub(/{{LANGUAGE_CODE}}/, lang);
+           gsub(/{{FAVICON_URL}}/, favicon);
+           gsub(/{{BUILD_HASH}}/, hash);
+           print }' "$INDEX_OUT" > "$INDEX_OUT.tmp" && mv "$INDEX_OUT.tmp" "$INDEX_OUT"
 
     # Replace HEAD_SCRIPTS safely (multiline)
     if [ -n "$HEAD_SCRIPTS" ]; then
@@ -45,6 +63,15 @@ build_index() {
         sed -i "s|{{HEAD_SCRIPTS}}||g" "$INDEX_OUT"
     fi
 
+    # Replace MENU_EXTRA_ITEMS safely (multiline)
+    if [ -n "$MENU_EXTRA_ITEMS" ]; then
+        awk -v r="$MENU_EXTRA_ITEMS" '{gsub("{{MENU_EXTRA_ITEMS}}", r)}1' "$INDEX_OUT" > "$INDEX_OUT.tmp" && mv "$INDEX_OUT.tmp" "$INDEX_OUT"
+    else
+        sed -i "s|{{MENU_EXTRA_ITEMS}}||g" "$INDEX_OUT"
+    fi
+    #--------------------------------------
+
+    #--------------------------------------
     # Apply translations
     while IFS= read -r line; do
         [[ -z "$line" ]] && continue
@@ -57,6 +84,7 @@ build_index() {
             sed -i "s|__('$ORIG')|$ORIG|g" "$INDEX_OUT"
         fi
     done <<< "$(echo "$TRANSLATION_MAP")"
+    #--------------------------------------
 
     echo "index.html atualizado ✨"
 }
