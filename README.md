@@ -30,13 +30,16 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 | :------------------------- | :------------------------- |
 | Aumentar zoom              | `Ctrl` + `+`               |
 | Diminuir zoom              | `Ctrl` + `-`               |
-| Alternar Tema             | `Ctrl` + `I`               |
-| Limpar marcações           | `Espaço`                   |
+| Alternar Tema              | `Ctrl` + `I`               |
+| Mudar Grade                | `Ctrl` + `O`               |
 | Ativar/Desativar chuva     | `Ctrl` + `R`               |
 | Tela Cheia                 | `F11`                      |
+| Limpar marcações           | `Espaço`                   |
+| Tela Cheia                 | `F11`                      |
+| Resetar                    | `Ctrl` + `Backspace`       |
+| Compartilhar grade         | `Ctrl` + `S`               |
 | **Mover ponto central**    | `Ctrl` + clique na célula  |
 | **Marcar célula piscando** | `Shift` + clique na célula |
-| **Compartilhar grade**     | `Ctrl` + `S`               |
 | **Adicionar Nota**         | Duplo clique na célula     |
 
 ## ⚙️ Clonar e modificar
@@ -67,10 +70,10 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
 
 O projeto possui um **sistema de build baseado em Bash** que:
 
-* Compila SCSS em CSS minificado (`dist/style.css`)
-* Minifica e bundleia o JS (`dist/script.min.js`)
-* Gera dinamicamente o `index.html` a partir do `index-source.html`
-* Substitui **placeholders** com variáveis definidas em `.env`:
+- Compila SCSS em CSS minificado (`dist/style.css`)
+- Minifica e bundleia o JS (`dist/script.min.js`)
+- Gera dinamicamente o `index.html` a partir do `index-source.html`
+- Substitui **placeholders** com variáveis definidas em `.env`:
 
 ```env
 TITLE='Tela de Amsler Responsiva | Rafael Oliveira'
@@ -89,8 +92,8 @@ Compartilhar||
 ...'
 ```
 
-* Atualiza **traduções e scripts extras** automaticamente no HTML
-* Suporta **modo watch** (`--watch`) para recompilar SCSS, JS e HTML ao salvar alterações
+- Atualiza **traduções e scripts extras** automaticamente no HTML
+- Suporta **modo watch** (`--watch`) para recompilar SCSS, JS e HTML ao salvar alterações
 
 ## 💡 Motivação
 
