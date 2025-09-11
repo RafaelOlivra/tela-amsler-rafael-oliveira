@@ -63,6 +63,35 @@ Uma ferramenta de **triagem visual interativa** desenvolvida para **diagnóstico
     python -m http.server
     ```
 
+## ⚙️ Build System com `.env`
+
+O projeto possui um **sistema de build baseado em Bash** que:
+
+* Compila SCSS em CSS minificado (`dist/style.css`)
+* Minifica e bundleia o JS (`dist/script.min.js`)
+* Gera dinamicamente o `index.html` a partir do `index-source.html`
+* Substitui **placeholders** com variáveis definidas em `.env`:
+
+```env
+TITLE='Tela de Amsler Responsiva | Rafael Oliveira'
+DESCRIPTION='Tela de Amsler — Ferramenta de triagem visual em tela cheia.'
+LANGUAGE_CODE='pt-BR'
+FAVICON_URL='./favicon.ico'
+
+HEAD_SCRIPTS=''
+MENU_EXTRA_ITEMS=''
+
+# Traduções para UI (opcional)
+TRANSLATION_MAP='
+Alternar Tema||
+Aumentar zoom||
+Compartilhar||
+...'
+```
+
+* Atualiza **traduções e scripts extras** automaticamente no HTML
+* Suporta **modo watch** (`--watch`) para recompilar SCSS, JS e HTML ao salvar alterações
+
 ## 💡 Motivação
 
 Tive um AVC em Julho de 2024 e venho sofrendo com perdas visuais. Essa ferramenta foi pensada para auxiliar no controle da perda visual e também para ajudar profissionais da saúde na triagem funcional de pacientes com distúrbios visuais, oferecendo estímulos precisos em tela cheia sem distrações.
