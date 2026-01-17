@@ -895,7 +895,7 @@ window.addEventListener("load", () => {
     setGridDataFromString(data);
 
     // Clear the URL parameter after loading
-    // Only to this if &clear=true
+    // Only do this if &clear=true
     if (urlParams.get("clear") === "true") {
       urlParams.delete("data");
       window.history.replaceState({}, document.title, window.location.pathname);
