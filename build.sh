@@ -128,7 +128,7 @@ build_index() {
         --minify-js true \
         -o "$INDEX_OUT"
 
-    echo "$INDEX_OUT atualizado ✨"
+    echo "$INDEX_OUT updated ✨"
 }
 
 # Delete previous dist contents
@@ -136,7 +136,7 @@ rm -rf dist/*
 
 # Compile assets
 if [ "$WATCH_MODE" = true ]; then
-    echo "Modo de observação ativado 🔁"
+    echo "Watching for changes 🔁"
 
     # Build once immediately
     build_index
@@ -160,5 +160,5 @@ else
     npx sass "$STYLE_SRC" "$STYLE_OUT" --style=compressed
     npx esbuild "$SCRIPT_SRC" --outfile="$SCRIPT_OUT" --minify
     build_index
-    echo "Build completo ✅"
+    echo "Build completed ✅"
 fi

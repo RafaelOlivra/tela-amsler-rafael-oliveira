@@ -17,6 +17,8 @@
   --cell-color-initial: white;
   --cell-color-inverse: black;
   --cell-highlight-color: rgb(194, 13, 13);
+  --cell-red-color: rgb(194, 13, 13);
+  --cell-green-color: rgb(32, 156, 72);
 
   --button-bg-color: rgba(0, 0, 0, 0.8);
   --button-text-color: white;
@@ -35,6 +37,8 @@ body.dark {
   --cell-color-initial: black;
   --cell-color-inverse: white;
   --cell-highlight-color: white;
+  --cell-red-color: white;
+  --cell-green-color: white;
 
   --button-bg-color: rgba(255, 255, 255, 0.9);
   --button-text-color: black;
@@ -76,15 +80,27 @@ body {
   background-color: var(--cell-color);
 
   &.colored {
-    background-color: var(--cell-highlight-color);
+    background-color: var(--cell-red-color);
+  }
+
+  &.colored-green {
+    background-color: var(--cell-green-color);
   }
 
   &:hover {
-    background-color: color-mix(in srgb, var(--cell-highlight-color), #fff 10%);
+    background-color: color-mix(in srgb, var(--cell-red-color), #fff 10%);
+  }
+
+  &.colored-green:hover {
+    background-color: color-mix(in srgb, var(--cell-green-color), #fff 10%);
   }
 
   &.blink-animation {
     animation: blink 1s infinite;
+  }
+
+  &.colored-green.blink-animation {
+    animation-name: blink-green;
   }
 
   body.grid-y & {
@@ -350,7 +366,17 @@ button {
 @keyframes blink {
   0%,
   100% {
-    background-color: var(--cell-highlight-color);
+    background-color: var(--cell-red-color);
+  }
+  50% {
+    background-color: transparent;
+  }
+}
+
+@keyframes blink-green {
+  0%,
+  100% {
+    background-color: var(--cell-green-color);
   }
   50% {
     background-color: transparent;
@@ -367,8 +393,10 @@ button {
     --line-color-inverse: white;
 
     --cell-color: white;
-    --cell-color-inverse: ;
+    --cell-color-inverse: black;
     --cell-highlight-color: black;
+    --cell-red-color: black;
+    --cell-green-color: black;
 
     --button-text-color: white;
   }
