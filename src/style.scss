@@ -83,6 +83,10 @@ body {
     background-color: color-mix(in srgb, var(--cell-highlight-color), #fff 10%);
   }
 
+  &.keyboard-hover {
+    background-color: color-mix(in srgb, var(--cell-highlight-color), #fff 10%);
+  }
+
   &.blink-animation {
     animation: blink 1s infinite;
   }

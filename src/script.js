@@ -10,7 +10,129 @@ let eraseMode = false;
 let zoomLevel = 1;
 let rainMode = false;
 let rainInterval;
+let keyboardMoveInterval;
+const activeArrowKeys = new Set();
 const timeoutDuration = 60000;
+const arrowKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
+
+/* ----------------------
+ * Keyboard Navigation
+ * ---------------------- */
+
+/**
+ * Returns grid dimensions and a static list of cells.
+ *
+ * @returns {{columns: number, rows: number, cells: HTMLElement[]}}
+ */
+function getGridMetrics() {
+  const grid = document.getElementById("grid");
+  const columns = parseInt(getComputedStyle(grid).gridTemplateColumns.split(" ").length);
+  const rows = parseInt(getComputedStyle(grid).gridTemplateRows.split(" ").length);
+  const cells = Array.from(grid.children);
+
+  return { columns, rows, cells };
+}
+
+/**
+ * Sets the current keyboard hover cell.
+ *
+ * @param {HTMLElement} targetCell - The cell to highlight as keyboard hover.
+ */
+function setKeyboardHoverCell(targetCell) {
+  if (!targetCell) return;
+
+  const currentKeyboardHover = document.querySelector(".grid-cell.keyboard-hover");
+  if (currentKeyboardHover) {
+    currentKeyboardHover.classList.remove("keyboard-hover");
+  }
+
+  targetCell.classList.add("keyboard-hover");
+}
+
+/**
+ * Ensures a keyboard hover cell exists after grid redraws.
+ */
+function ensureKeyboardHoverCell() {
+  const existing = document.querySelector(".grid-cell.keyboard-hover");
+  if (existing) return;
+
+  const centerCell = document.querySelector(".center-dot");
+  if (centerCell) {
+    centerCell.classList.add("keyboard-hover");
+    return;
+  }
+
+  const firstCell = document.querySelector(".grid-cell");
+  if (firstCell) {
+    firstCell.classList.add("keyboard-hover");
+  }
+}
+
+/**
+ * Computes movement delta from currently pressed arrow keys.
+ *
+ * @returns {{dx: number, dy: number}}
+ */
+function getArrowMovementDelta() {
+  const dx = (activeArrowKeys.has("ArrowRight") ? 1 : 0) - (activeArrowKeys.has("ArrowLeft") ? 1 : 0);
+  const dy = (activeArrowKeys.has("ArrowDown") ? 1 : 0) - (activeArrowKeys.has("ArrowUp") ? 1 : 0);
+
+  return { dx, dy };
+}
+
+/**
+ * Moves keyboard hover by one step and clamps at grid bounds.
+ *
+ * @param {number} dx - Horizontal delta (-1, 0, 1).
+ * @param {number} dy - Vertical delta (-1, 0, 1).
+ */
+function moveKeyboardHover(dx, dy) {
+  if (dx === 0 && dy === 0) return;
+
+  const { columns, rows, cells } = getGridMetrics();
+  if (!columns || !rows || cells.length === 0) return;
+
+  const currentCell =
+    document.querySelector(".grid-cell.keyboard-hover") || document.querySelector(".center-dot") || cells[0];
+
+  const currentIndex = cells.indexOf(currentCell);
+  if (currentIndex === -1) return;
+
+  const currentCol = currentIndex % columns;
+  const currentRow = Math.floor(currentIndex / columns);
+
+  const nextCol = Math.max(0, Math.min(columns - 1, currentCol + dx));
+  const nextRow = Math.max(0, Math.min(rows - 1, currentRow + dy));
+  const nextIndex = nextRow * columns + nextCol;
+
+  setKeyboardHoverCell(cells[nextIndex]);
+}
+
+/**
+ * Starts continuous keyboard hover movement while arrows are held.
+ */
+function startKeyboardMoveLoop() {
+  if (keyboardMoveInterval) return;
+
+  keyboardMoveInterval = setInterval(() => {
+    const { dx, dy } = getArrowMovementDelta();
+    if (dx === 0 && dy === 0) {
+      clearInterval(keyboardMoveInterval);
+      keyboardMoveInterval = null;
+      return;
+    }
+
+    moveKeyboardHover(dx, dy);
+  }, 70);
+}
+
+/**
+ * Stops continuous keyboard hover movement.
+ */
+function stopKeyboardMoveLoop() {
+  clearInterval(keyboardMoveInterval);
+  keyboardMoveInterval = null;
+}
 
 /* ----------------------
  * Grid Drawing
@@ -101,6 +223,8 @@ function drawGrid() {
   if (grid.children[currentCenterDotIndex]) {
     grid.children[currentCenterDotIndex].classList.add("center-dot");
   }
+
+  ensureKeyboardHoverCell();
 }
 
 /**
@@ -149,6 +273,8 @@ function drawGridFixed(columns, rows) {
   if (grid.children[centerIndex]) {
     grid.children[centerIndex].classList.add("center-dot");
   }
+
+  ensureKeyboardHoverCell();
 }
 
 /**
@@ -842,6 +968,19 @@ window.addEventListener("load", () => {
 
   // Handle keyboard shortcuts
   window.addEventListener("keydown", (e) => {
+    if (arrowKeys.has(e.key)) {
+      e.preventDefault();
+
+      if (!activeArrowKeys.has(e.key)) {
+        activeArrowKeys.add(e.key);
+        const { dx, dy } = getArrowMovementDelta();
+        moveKeyboardHover(dx, dy);
+      }
+
+      startKeyboardMoveLoop();
+      return;
+    }
+
     if (e.ctrlKey) {
       // Invert colors
       if (e.key.toLowerCase() === "i") {
@@ -885,6 +1024,20 @@ window.addEventListener("load", () => {
           cell.classList.remove("blink-animation");
         });
     }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (!arrowKeys.has(e.key)) return;
+
+    activeArrowKeys.delete(e.key);
+    if (activeArrowKeys.size === 0) {
+      stopKeyboardMoveLoop();
+    }
+  });
+
+  window.addEventListener("blur", () => {
+    activeArrowKeys.clear();
+    stopKeyboardMoveLoop();
   });
 
   // Load grid data from URL parameters or draw default grid
