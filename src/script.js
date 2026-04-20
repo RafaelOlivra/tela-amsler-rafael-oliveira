@@ -11,6 +11,12 @@ let zoomLevel = 1;
 let rainMode = false;
 let rainInterval;
 let keyboardMoveInterval;
+let isKeyboardPaintDown = false;
+const keyboardModifierState = {
+  ctrlPressed: false,
+  shiftPressed: false,
+  altPressed: false,
+};
 const activeArrowKeys = new Set();
 const timeoutDuration = 60000;
 const arrowKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
@@ -131,6 +137,10 @@ function startKeyboardMoveLoop() {
     }
 
     moveKeyboardHover(dx, dy);
+
+    if (isKeyboardPaintDown) {
+      paintKeyboardHoverCell(getPaintOptionsFromKeyboardState());
+    }
   }, 70);
 }
 
@@ -370,6 +380,31 @@ function getPaintOptionsFromInput(event, erase = false) {
     shiftPressed: Boolean(event.shiftKey),
     altPressed: Boolean(event.altKey),
     erase,
+  };
+}
+
+/**
+ * Syncs keyboard modifier state from an event.
+ *
+ * @param {KeyboardEvent} event - Keyboard event with modifier flags.
+ */
+function syncKeyboardModifierState(event) {
+  keyboardModifierState.ctrlPressed = Boolean(event.ctrlKey);
+  keyboardModifierState.shiftPressed = Boolean(event.shiftKey);
+  keyboardModifierState.altPressed = Boolean(event.altKey);
+}
+
+/**
+ * Returns paint options from currently held keyboard modifiers.
+ *
+ * @returns {{ctrlPressed: boolean, shiftPressed: boolean, altPressed: boolean, erase: boolean}}
+ */
+function getPaintOptionsFromKeyboardState() {
+  return {
+    ctrlPressed: keyboardModifierState.ctrlPressed,
+    shiftPressed: keyboardModifierState.shiftPressed,
+    altPressed: keyboardModifierState.altPressed,
+    erase: false,
   };
 }
 
@@ -1081,6 +1116,8 @@ window.addEventListener("load", () => {
 
   // Handle keyboard shortcuts
   window.addEventListener("keydown", (e) => {
+    syncKeyboardModifierState(e);
+
     if (arrowKeys.has(e.key)) {
       e.preventDefault();
 
@@ -1088,9 +1125,20 @@ window.addEventListener("load", () => {
         activeArrowKeys.add(e.key);
         const { dx, dy } = getArrowMovementDelta();
         moveKeyboardHover(dx, dy);
+
+        if (isKeyboardPaintDown) {
+          paintKeyboardHoverCell(getPaintOptionsFromKeyboardState());
+        }
       }
 
       startKeyboardMoveLoop();
+      return;
+    }
+
+    if (e.code === "Space") {
+      e.preventDefault();
+      isKeyboardPaintDown = true;
+      paintKeyboardHoverCell(getPaintOptionsFromKeyboardState());
       return;
     }
 
@@ -1128,7 +1176,7 @@ window.addEventListener("load", () => {
         e.preventDefault();
         resetGrid();
       }
-    } else if (e.code === "Space" || e.key === "Enter") {
+    } else if (e.key === "Enter") {
       e.preventDefault();
       paintKeyboardHoverCell(getPaintOptionsFromInput(e, false));
     } else if (e.key.toLowerCase() === "backspace") {
@@ -1138,6 +1186,12 @@ window.addEventListener("load", () => {
   });
 
   window.addEventListener("keyup", (e) => {
+    syncKeyboardModifierState(e);
+
+    if (e.code === "Space") {
+      isKeyboardPaintDown = false;
+    }
+
     if (!arrowKeys.has(e.key)) return;
 
     activeArrowKeys.delete(e.key);
@@ -1147,6 +1201,10 @@ window.addEventListener("load", () => {
   });
 
   window.addEventListener("blur", () => {
+    isKeyboardPaintDown = false;
+    keyboardModifierState.ctrlPressed = false;
+    keyboardModifierState.shiftPressed = false;
+    keyboardModifierState.altPressed = false;
     activeArrowKeys.clear();
     stopKeyboardMoveLoop();
   });
