@@ -69,6 +69,15 @@ function ensureKeyboardHoverCell() {
 }
 
 /**
+ * Returns the current keyboard-hover target.
+ *
+ * @returns {HTMLElement|null}
+ */
+function getKeyboardHoverCell() {
+  return document.querySelector(".grid-cell.keyboard-hover") || document.querySelector(".center-dot") || null;
+}
+
+/**
  * Computes movement delta from currently pressed arrow keys.
  *
  * @returns {{dx: number, dy: number}}
@@ -92,8 +101,7 @@ function moveKeyboardHover(dx, dy) {
   const { columns, rows, cells } = getGridMetrics();
   if (!columns || !rows || cells.length === 0) return;
 
-  const currentCell =
-    document.querySelector(".grid-cell.keyboard-hover") || document.querySelector(".center-dot") || cells[0];
+  const currentCell = getKeyboardHoverCell() || cells[0];
 
   const currentIndex = cells.indexOf(currentCell);
   if (currentIndex === -1) return;
@@ -193,21 +201,7 @@ function drawGrid() {
       }
     }
 
-    cell.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      isMouseDown = true;
-      eraseMode = e.button === 2; // Right-click for erase
-      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
-    });
-
-    cell.addEventListener("mouseover", (e) => {
-      if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
-    });
-
-    cell.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
-    });
+    bindGridCellInteractions(cell);
 
     grid.appendChild(cell);
   }
@@ -247,21 +241,7 @@ function drawGridFixed(columns, rows) {
     const cell = document.createElement("div");
     cell.className = "grid-cell";
 
-    cell.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      isMouseDown = true;
-      eraseMode = e.button === 2;
-      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
-    });
-
-    cell.addEventListener("mouseover", (e) => {
-      if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
-    });
-
-    cell.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
-    });
+    bindGridCellInteractions(cell);
 
     grid.appendChild(cell);
   }
@@ -377,6 +357,34 @@ function clearCellColor(cell) {
   cell.classList.remove("colored", "colored-green");
 }
 
+/**
+ * Converts event modifier keys to paint options.
+ *
+ * @param {KeyboardEvent|MouseEvent|TouchEvent} event - Source event.
+ * @param {boolean} erase - Whether erase mode is enabled.
+ * @returns {{ctrlPressed: boolean, shiftPressed: boolean, altPressed: boolean, erase: boolean}}
+ */
+function getPaintOptionsFromInput(event, erase = false) {
+  return {
+    ctrlPressed: Boolean(event.ctrlKey),
+    shiftPressed: Boolean(event.shiftKey),
+    altPressed: Boolean(event.altKey),
+    erase,
+  };
+}
+
+/**
+ * Clears all drawn and blinking cells.
+ */
+function clearPaintedCells() {
+  document
+    .querySelectorAll(".grid-cell.colored, .grid-cell.colored-green, .grid-cell.blink-animation")
+    .forEach((cell) => {
+      clearCellColor(cell);
+      cell.classList.remove("blink-animation");
+    });
+}
+
 /* ----------------------
  * Grid Interactions
  * ---------------------- */
@@ -385,10 +393,11 @@ function clearCellColor(cell) {
  * Paints a cell based on the current mode (coloring, blinking, erasing).
  *
  * @param {HTMLElement} cell - The grid cell to paint.
- * @param {boolean} ctrlPressed - Whether the Ctrl key is pressed.
- * @param {boolean} shiftPressed - Whether the Shift key is pressed.
+ * @param {{ctrlPressed?: boolean, shiftPressed?: boolean, altPressed?: boolean, erase?: boolean}} paintOptions
  */
-function paintCell(cell, ctrlPressed, shiftPressed, altPressed = false) {
+function paintCell(cell, paintOptions = {}) {
+  const { ctrlPressed = false, shiftPressed = false, altPressed = false, erase = false } = paintOptions;
+
   if (ctrlPressed) {
     moveCenterDot(cell);
   } else if (shiftPressed && altPressed) {
@@ -396,7 +405,7 @@ function paintCell(cell, ctrlPressed, shiftPressed, altPressed = false) {
     cell.classList.toggle("blink-animation");
   } else if (shiftPressed) {
     cell.classList.toggle("blink-animation");
-  } else if (eraseMode) {
+  } else if (erase) {
     clearCellColor(cell);
     cell.classList.remove("blink-animation"); // Stop blinking when erased
   } else if (altPressed) {
@@ -404,6 +413,41 @@ function paintCell(cell, ctrlPressed, shiftPressed, altPressed = false) {
   } else {
     setCellColorMode(cell, "red");
   }
+}
+
+/**
+ * Paints the currently keyboard-hovered cell.
+ *
+ * @param {{ctrlPressed?: boolean, shiftPressed?: boolean, altPressed?: boolean, erase?: boolean}} paintOptions
+ */
+function paintKeyboardHoverCell(paintOptions = {}) {
+  const cell = getKeyboardHoverCell();
+  if (!cell) return;
+  paintCell(cell, paintOptions);
+}
+
+/**
+ * Binds pointer and touch interaction handlers to one grid cell.
+ *
+ * @param {HTMLElement} cell - The grid cell to bind interactions for.
+ */
+function bindGridCellInteractions(cell) {
+  cell.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+    isMouseDown = true;
+    eraseMode = event.button === 2; // Right-click for erase
+    paintCell(cell, getPaintOptionsFromInput(event, eraseMode));
+  });
+
+  cell.addEventListener("mouseover", (event) => {
+    if (!isMouseDown) return;
+    paintCell(cell, getPaintOptionsFromInput(event, eraseMode));
+  });
+
+  cell.addEventListener("touchstart", (event) => {
+    event.preventDefault();
+    paintCell(cell, getPaintOptionsFromInput(event, false));
+  });
 }
 
 /**
@@ -1084,14 +1128,12 @@ window.addEventListener("load", () => {
         e.preventDefault();
         resetGrid();
       }
-    } else if (e.code === "Space") {
+    } else if (e.code === "Space" || e.key === "Enter") {
       e.preventDefault();
-      document
-        .querySelectorAll(".grid-cell.colored, .grid-cell.colored-green, .grid-cell.blink-animation") // Clear blinking cells too
-        .forEach((cell) => {
-          clearCellColor(cell);
-          cell.classList.remove("blink-animation");
-        });
+      paintKeyboardHoverCell(getPaintOptionsFromInput(e, false));
+    } else if (e.key.toLowerCase() === "backspace") {
+      e.preventDefault();
+      clearPaintedCells();
     }
   });
 
