@@ -149,7 +149,7 @@ function drawGrid() {
   // Save current colored cell state to reapply after resize
   const oldCells = Array.from(grid.children);
   const oldState = oldCells.map((cell) => ({
-    isColored: cell.classList.contains("colored"),
+    colorMode: cell.classList.contains("colored-green") ? "green" : cell.classList.contains("colored") ? "red" : null,
     isBlinking: cell.classList.contains("blink-animation"), // Save blink state
     isCenterDot: cell.classList.contains("center-dot"),
   }));
@@ -184,8 +184,8 @@ function drawGrid() {
 
     // Reapply old state if it exists for the current cell
     if (oldState[i]) {
-      if (oldState[i].isColored) {
-        cell.classList.add("colored");
+      if (oldState[i].colorMode) {
+        setCellColorMode(cell, oldState[i].colorMode);
       }
       if (oldState[i].isBlinking) {
         // Reapply blink state
@@ -197,16 +197,16 @@ function drawGrid() {
       e.preventDefault();
       isMouseDown = true;
       eraseMode = e.button === 2; // Right-click for erase
-      paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
     });
 
     cell.addEventListener("mouseover", (e) => {
-      if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+      if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
     });
 
     cell.addEventListener("touchstart", (e) => {
       e.preventDefault();
-      paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
     });
 
     grid.appendChild(cell);
@@ -251,16 +251,16 @@ function drawGridFixed(columns, rows) {
       e.preventDefault();
       isMouseDown = true;
       eraseMode = e.button === 2;
-      paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
     });
 
     cell.addEventListener("mouseover", (e) => {
-      if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+      if (isMouseDown) paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
     });
 
     cell.addEventListener("touchstart", (e) => {
       e.preventDefault();
-      paintCell(cell, e.ctrlKey, e.shiftKey); // Pass ctrlKey and shiftKey
+      paintCell(cell, e.ctrlKey, e.shiftKey, e.altKey); // Pass ctrlKey, shiftKey, and altKey
     });
 
     grid.appendChild(cell);
@@ -334,6 +334,49 @@ function applyLineColor(color) {
   }
 }
 
+/**
+ * Returns the drawing color mode for a cell.
+ *
+ * @param {HTMLElement} cell - The grid cell to inspect.
+ * @returns {string|null} - "red", "green", or null.
+ */
+function getCellColorMode(cell) {
+  if (cell?.classList.contains("colored-green")) {
+    return "green";
+  }
+
+  if (cell?.classList.contains("colored")) {
+    return "red";
+  }
+
+  return null;
+}
+
+/**
+ * Applies a drawing color mode to a cell.
+ *
+ * @param {HTMLElement} cell - The grid cell to update.
+ * @param {string|null} colorMode - "red", "green", or null.
+ */
+function setCellColorMode(cell, colorMode) {
+  cell.classList.remove("colored", "colored-green");
+
+  if (colorMode === "green") {
+    cell.classList.add("colored", "colored-green");
+  } else if (colorMode === "red") {
+    cell.classList.add("colored");
+  }
+}
+
+/**
+ * Clears any drawing color from a cell.
+ *
+ * @param {HTMLElement} cell - The grid cell to clear.
+ */
+function clearCellColor(cell) {
+  cell.classList.remove("colored", "colored-green");
+}
+
 /* ----------------------
  * Grid Interactions
  * ---------------------- */
@@ -345,16 +388,21 @@ function applyLineColor(color) {
  * @param {boolean} ctrlPressed - Whether the Ctrl key is pressed.
  * @param {boolean} shiftPressed - Whether the Shift key is pressed.
  */
-function paintCell(cell, ctrlPressed, shiftPressed) {
+function paintCell(cell, ctrlPressed, shiftPressed, altPressed = false) {
   if (ctrlPressed) {
     moveCenterDot(cell);
+  } else if (shiftPressed && altPressed) {
+    setCellColorMode(cell, "green");
+    cell.classList.toggle("blink-animation");
   } else if (shiftPressed) {
     cell.classList.toggle("blink-animation");
   } else if (eraseMode) {
-    cell.classList.remove("colored");
+    clearCellColor(cell);
     cell.classList.remove("blink-animation"); // Stop blinking when erased
+  } else if (altPressed) {
+    setCellColorMode(cell, "green");
   } else {
-    cell.classList.add("colored");
+    setCellColorMode(cell, "red");
   }
 }
 
@@ -428,21 +476,32 @@ function getGridDataString(columns, rows) {
   }
 
   for (let row = 0; row < rows; row++) {
-    let rowRanges = [];
+    let rowRedRanges = [];
+    let rowGreenRanges = [];
     let rowBlinks = [];
-    let currentRangeStart = null;
+    let currentRedRangeStart = null;
+    let currentGreenRangeStart = null;
 
     for (let col = 0; col < columns; col++) {
       const index = row * columns + col;
       const cell = cells[index];
-      const isColored = cell?.classList.contains("colored");
+      const colorMode = getCellColorMode(cell);
       const isBlinking = cell?.classList.contains("blink-animation");
+      const isRed = colorMode === "red";
+      const isGreen = colorMode === "green";
 
-      if (isColored && currentRangeStart === null) {
-        currentRangeStart = col + 1;
-      } else if (!isColored && currentRangeStart !== null) {
-        rowRanges.push(`[${currentRangeStart}-${col}]`);
-        currentRangeStart = null;
+      if (isRed && currentRedRangeStart === null) {
+        currentRedRangeStart = col + 1;
+      } else if (!isRed && currentRedRangeStart !== null) {
+        rowRedRanges.push(`[${currentRedRangeStart}-${col}]`);
+        currentRedRangeStart = null;
+      }
+
+      if (isGreen && currentGreenRangeStart === null) {
+        currentGreenRangeStart = col + 1;
+      } else if (!isGreen && currentGreenRangeStart !== null) {
+        rowGreenRanges.push(`G[${currentGreenRangeStart}-${col}]`);
+        currentGreenRangeStart = null;
       }
 
       if (isBlinking) {
@@ -450,14 +509,21 @@ function getGridDataString(columns, rows) {
       }
     }
 
-    if (currentRangeStart !== null) {
-      rowRanges.push(`[${currentRangeStart}-${columns}]`); // Close any open range at the end of the row
+    if (currentRedRangeStart !== null) {
+      rowRedRanges.push(`[${currentRedRangeStart}-${columns}]`); // Close any open range at the end of the row
     }
 
-    if (rowRanges.length > 0 || rowBlinks.length > 0) {
+    if (currentGreenRangeStart !== null) {
+      rowGreenRanges.push(`G[${currentGreenRangeStart}-${columns}]`); // Close any open green range at the end of the row
+    }
+
+    if (rowRedRanges.length > 0 || rowGreenRanges.length > 0 || rowBlinks.length > 0) {
       let rowSegment = `R${row + 1}`;
-      if (rowRanges.length > 0) {
-        rowSegment += rowRanges.join("");
+      if (rowRedRanges.length > 0) {
+        rowSegment += rowRedRanges.join("");
+      }
+      if (rowGreenRanges.length > 0) {
+        rowSegment += rowGreenRanges.join("");
       }
       if (rowBlinks.length > 0) {
         rowSegment += `BR[${rowBlinks.join(",")}]`; // New BR token
@@ -594,7 +660,7 @@ function setGridDataFromString(encodedData) {
   }
 
   // Regex to match R segments (colored ranges) and BR segments (blinking cells)
-  const rangeRegex = /\[(\d+)-(\d+)\]/g;
+  const rangeRegex = /([G]?)\[(\d+)-(\d+)\]/g;
   const brRegex = /BR\[([\d,]+)\]/; // To extract columns from BR token
 
   // Create an array to hold all row data to parse them correctly
@@ -653,11 +719,14 @@ function setGridDataFromString(encodedData) {
       // Process ranges
       let rangeMatch;
       while ((rangeMatch = rangeRegex.exec(rangesStr)) !== null) {
-        const start = parseInt(rangeMatch[1]) - 1;
-        const end = parseInt(rangeMatch[2]) - 1;
+        const colorMode = rangeMatch[1] === "G" ? "green" : "red";
+        const start = parseInt(rangeMatch[2]) - 1;
+        const end = parseInt(rangeMatch[3]) - 1;
         for (let col = start; col <= end; col++) {
           const index = row * columns + col;
-          if (cells[index]) cells[index].classList.add("colored");
+          if (cells[index]) {
+            setCellColorMode(cells[index], colorMode);
+          }
         }
       }
       rangeRegex.lastIndex = 0; // Reset for next iteration
@@ -776,14 +845,14 @@ function startRain() {
       // Clear the cell that's now behind the tail
       const clearIndex = (currentRow - tailLength) * columns + col;
       if (currentRow >= tailLength && cells[clearIndex]) {
-        cells[clearIndex].classList.remove("colored");
+        clearCellColor(cells[clearIndex]);
         cells[clearIndex].classList.remove("blink-animation"); // Ensure blinking stops
       }
 
       // Add the new cell to the tail
       const index = currentRow * columns + col;
       if (cells[index]) {
-        cells[index].classList.add("colored");
+        setCellColorMode(cells[index], "red");
       }
 
       currentRow++;
@@ -852,9 +921,9 @@ function toggleRainMode() {
     clearInterval(rainInterval);
     // Clear all colored cells when exiting rain mode
     document
-      .querySelectorAll(".grid-cell.colored, .grid-cell.blink-animation") // Clear blinking cells too
+      .querySelectorAll(".grid-cell.colored, .grid-cell.colored-green, .grid-cell.blink-animation") // Clear blinking cells too
       .forEach((cell) => {
-        cell.classList.remove("colored");
+        clearCellColor(cell);
         cell.classList.remove("blink-animation");
       });
     document.body.classList.remove("rain-mode");
@@ -1018,9 +1087,9 @@ window.addEventListener("load", () => {
     } else if (e.code === "Space") {
       e.preventDefault();
       document
-        .querySelectorAll(".grid-cell.colored, .grid-cell.blink-animation") // Clear blinking cells too
+        .querySelectorAll(".grid-cell.colored, .grid-cell.colored-green, .grid-cell.blink-animation") // Clear blinking cells too
         .forEach((cell) => {
-          cell.classList.remove("colored");
+          clearCellColor(cell);
           cell.classList.remove("blink-animation");
         });
     }
